@@ -1,0 +1,13 @@
+<library path="waypoint_editer">  
+    <class name="waypoint_editer/WaypointEditerTool"
+           type="waypoint_editer::WaypointEditerTool"
+           base_class_type="rviz_common::Tool">
+        <description>Waypoint Editer Tool</description>
+    </class>
+    
+    <class name="waypoint_editer/WaypointEditerPanel"
+           type="waypoint_editer::WaypointEditerPanel"
+           base_class_type="rviz_common::Panel">
+      <description>Waypoint Editer Panel</description>
+    </class>
+  </library>

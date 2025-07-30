@@ -1,21 +1,23 @@
+[日本語](README.ja.md) | [English](README.md)
+
 # Waypoint Editor
 
-## 目次
-- [概要](#概要)
-- [開発環境](#開発環境)
-- [インストール方法](#インストール方法)
-- [使用方法](#使用方法)
+## Table of Contents
+- [Overview](#overview)
+- [Development Environment](#development-environment)
+- [Installation](#installation)
+- [Usage](#usage)
 
-## 概要
-このパッケージは、ナビゲーションで使用するウェイポイント（Waypoint）を、2次元地図を見ながら直感的に編集・保存できるツールです。  
-編集したウェイポイントは **CSV形式**で保存が可能です。
+## Overview
+This package provides a tool for intuitively editing and saving waypoints used in robot navigation while referencing a 2D map.  
+The edited waypoints can be saved in **CSV format**.
 
-## 開発環境
+## Development Environment
 - Ubuntu 22.04 (Jammy Jellyfish)
 - ROS 2 Humble Hawksbill
 
-## インストール方法
-以下のコマンドをターミナルで実行してください：
+## Installation
+Run the following commands in your terminal:
 
 ```bash
 mkdir -p ~/ros2_ws/src
@@ -26,10 +28,10 @@ rosdep update && rosdep install --from-paths src --ignore-src -y
 colcon build
 ```
 
-## 使用方法
+## Usage
 
-### 1. Waypoint Editor の起動  
-以下のコマンドでツールを起動します：
+### 1. Launching the Waypoint Editor  
+Run the following commands to launch the tool:
 
 ```bash
 cd ~/ros2_ws
@@ -37,19 +39,21 @@ source install/setup.bash
 ros2 launch waypoint_editer waypoint_editer.launch.py
 ```
 
-### 2. 2Dマップの読み込み  
-- Nav2 の `nav2_map_server` を利用して `.yaml` 形式の2Dマップを読み込みます。  
-- RViz2 画面右下のパネルで **Load 2D Map** をクリックし、使用したい `.yaml` ファイルを選択してください。
+### 2. Loading a 2D Map  
+- Use Nav2's `nav2_map_server` to load a 2D map in `.yaml` format.  
+- Click the **Load 2D Map** button in the bottom-left panel of RViz2 and select the desired `.yaml` file.
 
-### 3. ウェイポイントの追加  
-- RViz2 画面上部のツールバーから **Add Waypoint** を選択します。  
-- 地図上でドラッグ＆ドロップすることで、位置と向きを指定して新しいウェイポイントを追加できます。  
-- 追加されたウェイポイントは：
-  - **ドラッグで移動・回転**が可能
-  - **右クリックでメニュー表示**から削除や編集が可能
+### 3. Adding Waypoints  
+- From the toolbar at the top of RViz2, select **Add Waypoint**.  
+- Click and drag on the map to add a new waypoint with the desired position and orientation.  
+- Once added, each waypoint can:
+  - Be **moved or rotated** via drag operations
+  - Be **right-clicked** to open a context menu for deletion or other actions
 
-### 4. ウェイポイントの保存  
-- RViz2 画面右下のパネルで **Save Waypoints** を選択し、保存したいファイル名を入力することで、編集内容を **CSV形式**で保存できます。
+### 4. Saving Waypoints  
+- Click **Save Waypoints** in the bottom-right panel of RViz2.  
+- Enter a file name to save the edited waypoints in **CSV format**.
 
-### 5. ウェイポイントの読み込み  
-- **Load Waypoints** ボタンから、過去に保存した `.csv` ファイルを読み込み、ウェイポイントの再編集が可能です。
+### 5. Loading Waypoints  
+- Click **Load Waypoints** to load a previously saved `.csv` file.  
+- The waypoints can then be edited again in the same interface.

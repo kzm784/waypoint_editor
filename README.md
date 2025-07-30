@@ -2,6 +2,8 @@
 
 # Waypoint Editor
 
+![demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/waypoint_editor_demo.gif)
+
 ## Table of Contents
 - [Overview](#overview)
 - [Development Environment](#development-environment)

@@ -2,6 +2,8 @@
 
 # Waypoint Editor
 
+![demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/waypoint_editor_demo.gif)
+
 ## 目次
 - [概要](#概要)
 - [開発環境](#開発環境)

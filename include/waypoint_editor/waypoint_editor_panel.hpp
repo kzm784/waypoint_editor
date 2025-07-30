@@ -1,5 +1,5 @@
-#ifndef WAYPOINT_EDITER__WAYPOINT_EDITER_PANEL_HPP_
-#define WAYPOINT_EDITER__WAYPOINT_EDITER_PANEL_HPP_
+#ifndef WAYPOINT_EDITOR__WAYPOINT_EDITOR_PANEL_HPP_
+#define WAYPOINT_EDITOR__WAYPOINT_EDITOR_PANEL_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <rviz_common/panel.hpp>
@@ -7,16 +7,16 @@
 #include <std_srvs/srv/trigger.hpp>
 #include <nav2_msgs/srv/load_map.hpp>
 
-namespace waypoint_editer
+namespace waypoint_editor
 {
 
-class WaypointEditerPanel : public rviz_common::Panel
+class WaypointEditorPanel : public rviz_common::Panel
 {
     Q_OBJECT
     
     public:
-        explicit WaypointEditerPanel(QWidget *parent = nullptr);
-        ~WaypointEditerPanel() override;
+        explicit WaypointEditorPanel(QWidget *parent = nullptr);
+        ~WaypointEditorPanel() override;
 
         void onInitialize() override;
         void load(const rviz_common::Config &config) override;
@@ -43,6 +43,6 @@ class WaypointEditerPanel : public rviz_common::Panel
         rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr save_client_;
 };
     
-} // namespace waypoint_editer
+} // namespace waypoint_editor
 
-#endif // WAYPOINT_EDITER__WAYPOINT_EDITER_PANEL_HPP_
+#endif // WAYPOINT_EDITOR__WAYPOINT_EDITOR_PANEL_HPP_

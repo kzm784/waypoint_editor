@@ -1,5 +1,5 @@
-#ifndef WAYPOINT_EDITER__WAYPOINT_MARKER_TOOL_HPP_
-#define WAYPOINT_EDITER__WAYPOINT_MARKER_TOOL_HPP_
+#ifndef WAYPOINT_EDITOR__WAYPOINT_EDITOR_TOOL_HPP_
+#define WAYPOINT_EDITOR__WAYPOINT_EDITOR_TOOL_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <rviz_common/tool.hpp>
@@ -14,7 +14,7 @@
 #include <std_srvs/srv/trigger.hpp>
 #include <QObject>
 
-namespace waypoint_editer
+namespace waypoint_editor
 {
 
 struct Waypoint
@@ -23,13 +23,13 @@ struct Waypoint
     std::string function_command;
 };
 
-class WaypointEditerTool : public rviz_default_plugins::tools::PoseTool
+class WaypointEditorTool : public rviz_default_plugins::tools::PoseTool
 {
     Q_OBJECT
 
 public:
-    WaypointEditerTool();
-    virtual ~WaypointEditerTool();
+    WaypointEditorTool();
+    virtual ~WaypointEditorTool();
 
     void onInitialize() override;
     void activate() override;
@@ -59,6 +59,6 @@ private:
     std::vector<Waypoint> waypoints_;
 };
     
-} // namespace waypoint_editer
+} // namespace waypoint_editor
 
-#endif // WAYPOINT_EDITER__WAYPOINT_MARKER_TOOL_HPP_
+#endif // WAYPOINT_EDITOR__WAYPOINT_EDITOR_TOOL_HPP_

@@ -14,17 +14,17 @@
 #include <QTextStream>
 #include <fstream>
 
-#include "waypoint_editer/waypoint_editer_tool.hpp"
+#include "waypoint_editor/waypoint_editor_tool.hpp"
 
 using namespace std::placeholders;
 
-namespace waypoint_editer
+namespace waypoint_editor
 {
 
-WaypointEditerTool::WaypointEditerTool() : rviz_default_plugins::tools::PoseTool() {}
-WaypointEditerTool::~WaypointEditerTool() {}
+WaypointEditorTool::WaypointEditorTool() : rviz_default_plugins::tools::PoseTool() {}
+WaypointEditorTool::~WaypointEditorTool() {}
 
-void WaypointEditerTool::onInitialize()
+void WaypointEditorTool::onInitialize()
 {
     PoseTool::onInitialize();
 
@@ -41,21 +41,21 @@ void WaypointEditerTool::onInitialize()
     line_pub_ = nh_->create_publisher<visualization_msgs::msg::Marker>("waypoint_line", 10);
     line_timer_ = nh_->create_wall_timer(
         std::chrono::milliseconds(500),
-        std::bind(&WaypointEditerTool::publishLineMarker, this)
+        std::bind(&WaypointEditorTool::publishLineMarker, this)
     );
     save_service_ = nh_->create_service<std_srvs::srv::Trigger>(
         "save_waypoints",
-        std::bind(&WaypointEditerTool::handleSaveWaypoints, this, _1, _2)
+        std::bind(&WaypointEditorTool::handleSaveWaypoints, this, _1, _2)
     );
     load_service_ = nh_->create_service<std_srvs::srv::Trigger>(
         "load_waypoints",
-        std::bind(&WaypointEditerTool::handleLoadWaypoints, this, _1, _2)
+        std::bind(&WaypointEditorTool::handleLoadWaypoints, this, _1, _2)
     );
 
     waypoints_.clear();
 }
 
-void WaypointEditerTool::onPoseSet(double x, double y, double theta)
+void WaypointEditorTool::onPoseSet(double x, double y, double theta)
 {
     Waypoint wp;
     wp.pose.header.frame_id = "map";
@@ -77,25 +77,25 @@ void WaypointEditerTool::onPoseSet(double x, double y, double theta)
     
     int new_id = static_cast<int>(waypoints_.size() - 1);
     auto int_marker = createWaypointMarker(new_id);
-    server_->insert(int_marker, std::bind(&WaypointEditerTool::processFeedback, this, _1));
+    server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
     server_->applyChanges();
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
     
     deactivate();
 }
 
-void WaypointEditerTool::updateWaypointMarker()
+void WaypointEditorTool::updateWaypointMarker()
 {
     server_->clear();
     for (size_t i = 0; i < waypoints_.size(); ++i) {
         auto int_marker = createWaypointMarker(static_cast<int>(i));
-        server_->insert(int_marker, std::bind(&WaypointEditerTool::processFeedback, this, _1));
+        server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
     }
 
     server_->applyChanges();
 }
 
-visualization_msgs::msg::InteractiveMarker WaypointEditerTool::createWaypointMarker(const int id)
+visualization_msgs::msg::InteractiveMarker WaypointEditorTool::createWaypointMarker(const int id)
 {
     const auto & wp = waypoints_[id];
 
@@ -211,7 +211,7 @@ visualization_msgs::msg::InteractiveMarker WaypointEditerTool::createWaypointMar
     return int_marker;
 }
 
-void WaypointEditerTool::processFeedback(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> &fb)
+void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> &fb)
 {
     int id = std::stoi(fb->marker_name);
 
@@ -235,7 +235,7 @@ void WaypointEditerTool::processFeedback(const std::shared_ptr<const visualizati
     }    
 }
 
-void WaypointEditerTool::processMenuControl(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> & fb)
+void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> & fb)
 {
     if (fb->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::MENU_SELECT) { return; }
 
@@ -315,7 +315,7 @@ void WaypointEditerTool::processMenuControl(const std::shared_ptr<const visualiz
     }
 }
 
-void WaypointEditerTool::publishLineMarker()
+void WaypointEditorTool::publishLineMarker()
 {
     visualization_msgs::msg::Marker line;
     line.header.frame_id = "map";
@@ -340,7 +340,7 @@ void WaypointEditerTool::publishLineMarker()
     line_pub_->publish(line);
 }
 
-void WaypointEditerTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+void WaypointEditorTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
 {
     QString qpath = QFileDialog::getSaveFileName(
         nullptr,
@@ -412,7 +412,7 @@ void WaypointEditerTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv
     return;
 }
 
-void WaypointEditerTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
 {
     QString qpath = QFileDialog::getOpenFileName(
         nullptr,
@@ -480,13 +480,13 @@ void WaypointEditerTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv
     res->message = "Loaded " + std::to_string(waypoints_.size()) + " waypoints from " + qpath.toStdString();
 }
 
-void WaypointEditerTool::activate() {}
-void WaypointEditerTool::deactivate()
+void WaypointEditorTool::activate() {}
+void WaypointEditorTool::deactivate()
 {
     PoseTool::deactivate();
 }
 
-} // namespace waypoint_editer
+} // namespace waypoint_editor
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(waypoint_editer::WaypointEditerTool, rviz_common::Tool)
+PLUGINLIB_EXPORT_CLASS(waypoint_editor::WaypointEditorTool, rviz_common::Tool)

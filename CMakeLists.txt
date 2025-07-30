@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(waypoint_editer)
+project(waypoint_editor)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -18,12 +18,12 @@ find_package(nav2_msgs REQUIRED)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
-set(waypoint_editer_headers
-  include/waypoint_editer/waypoint_editer_tool.hpp
-  include/waypoint_editer/waypoint_editer_panel.hpp
+set(waypoint_editor_headers
+  include/waypoint_editor/waypoint_editor_tool.hpp
+  include/waypoint_editor/waypoint_editor_panel.hpp
 )
-qt5_wrap_cpp(waypoint_editer_moc
-  ${waypoint_editer_headers}
+qt5_wrap_cpp(waypoint_editor_moc
+  ${waypoint_editor_headers}
 )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -32,9 +32,9 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 add_library(${PROJECT_NAME} SHARED
-  src/waypoint_editer_tool.cpp
-  src/waypoint_editer_panel.cpp
-  ${waypoint_editer_moc}
+  src/waypoint_editor_tool.cpp
+  src/waypoint_editor_panel.cpp
+  ${waypoint_editor_moc}
 )
 
 target_include_directories(${PROJECT_NAME}

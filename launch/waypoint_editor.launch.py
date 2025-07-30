@@ -6,8 +6,8 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    pkg = get_package_share_directory('waypoint_editer')
-    rviz_config = os.path.join(pkg, 'rviz', 'rviz_waypoint_editer.rviz')
+    pkg = get_package_share_directory('waypoint_editor')
+    rviz_config = os.path.join(pkg, 'rviz', 'rviz_waypoint_editor.rviz')
 
     declare_map_yaml = DeclareLaunchArgument(
         'map_yaml', default_value=os.path.join(pkg, 'data', 'sample_map.yaml'),

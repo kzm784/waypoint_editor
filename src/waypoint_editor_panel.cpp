@@ -4,12 +4,12 @@
 #include <std_srvs/srv/trigger.hpp>
 #include <nav2_msgs/srv/load_map.hpp>
 
-#include "waypoint_editer/waypoint_editer_panel.hpp"
+#include "waypoint_editor/waypoint_editor_panel.hpp"
 
-namespace waypoint_editer
+namespace waypoint_editor
 {
 
-WaypointEditerPanel::WaypointEditerPanel(QWidget *parent) : rviz_common::Panel(parent)
+WaypointEditorPanel::WaypointEditorPanel(QWidget *parent) : rviz_common::Panel(parent)
 {
     load_2d_map_button_ = new QPushButton("Load 2D Map", this);
     load_waypoints_button_ = new QPushButton("Load Waypoints", this);
@@ -42,9 +42,9 @@ WaypointEditerPanel::WaypointEditerPanel(QWidget *parent) : rviz_common::Panel(p
     connect(save_waypoints_button_, SIGNAL(clicked()), this, SLOT(onSaveWaypointsButtonClick()));    
 }
 
-WaypointEditerPanel::~WaypointEditerPanel() {}
+WaypointEditorPanel::~WaypointEditorPanel() {}
 
-void WaypointEditerPanel::onInitialize()
+void WaypointEditorPanel::onInitialize()
 {
     nh_ = this->getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
     load_map_client_ = nh_->create_client<nav2_msgs::srv::LoadMap>("map_server/load_map");
@@ -52,17 +52,17 @@ void WaypointEditerPanel::onInitialize()
     save_client_ = nh_->create_client<std_srvs::srv::Trigger>("save_waypoints");    
 }
 
-void WaypointEditerPanel::load(const rviz_common::Config &config)
+void WaypointEditorPanel::load(const rviz_common::Config &config)
 {
     rviz_common::Panel::load(config);
 }
 
-void WaypointEditerPanel::save(rviz_common::Config config) const
+void WaypointEditorPanel::save(rviz_common::Config config) const
 {
     rviz_common::Panel::save(config);
 }
 
-void WaypointEditerPanel::onLoad2DMap()
+void WaypointEditorPanel::onLoad2DMap()
 {
     QString qpath = QFileDialog::getOpenFileName(
         this,
@@ -96,7 +96,7 @@ void WaypointEditerPanel::onLoad2DMap()
         });
 }
 
-void WaypointEditerPanel::onLoadWaypointsButtonClick()
+void WaypointEditorPanel::onLoadWaypointsButtonClick()
 {
     if (!load_client_->wait_for_service(std::chrono::seconds(1))) {
         status_label_->setText("Load service unavailable");
@@ -112,7 +112,7 @@ void WaypointEditerPanel::onLoadWaypointsButtonClick()
         });
 }
 
-void WaypointEditerPanel::onSaveWaypointsButtonClick()
+void WaypointEditorPanel::onSaveWaypointsButtonClick()
 {
     if (!save_client_->wait_for_service(std::chrono::seconds(1))) {
         status_label_->setText("Save service unavailable");
@@ -128,7 +128,7 @@ void WaypointEditerPanel::onSaveWaypointsButtonClick()
         });
 }
 
-} // namespace waypoint_editer
+} // namespace waypoint_editor
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(waypoint_editer::WaypointEditerPanel, rviz_common::Panel)
+PLUGINLIB_EXPORT_CLASS(waypoint_editor::WaypointEditorPanel, rviz_common::Panel)

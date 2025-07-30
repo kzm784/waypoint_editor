@@ -41,7 +41,7 @@ ros2 launch waypoint_editer waypoint_editer.launch.py
 
 ### 2. Loading a 2D Map  
 - Use Nav2's `nav2_map_server` to load a 2D map in `.yaml` format.  
-- Click the **Load 2D Map** button in the bottom-left panel of RViz2 and select the desired `.yaml` file.
+- Click the **Load 2D Map** button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
 
 ### 3. Adding Waypoints  
 - From the toolbar at the top of RViz2, select **Add Waypoint**.  
@@ -51,9 +51,9 @@ ros2 launch waypoint_editer waypoint_editer.launch.py
   - Be **right-clicked** to open a context menu for deletion or other actions
 
 ### 4. Saving Waypoints  
-- Click **Save Waypoints** in the bottom-right panel of RViz2.  
+- Click **Save Waypoints** button in the bottom-right panel of RViz2.  
 - Enter a file name to save the edited waypoints in **CSV format**.
 
 ### 5. Loading Waypoints  
-- Click **Load Waypoints** to load a previously saved `.csv` file.  
+- Click **Load Waypoints** button in the bottom-right panel of RViz2 and select the previously saved `.csv` file.  
 - The waypoints can then be edited again in the same interface.

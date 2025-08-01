@@ -134,7 +134,28 @@ void WaypointEditorPanel::onInitialize()
     nh_               = this->getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
     load_map_client_  = nh_->create_client<nav2_msgs::srv::LoadMap>("map_server/load_map");
     load_client_      = nh_->create_client<std_srvs::srv::Trigger>("load_waypoints");
-    save_client_      = nh_->create_client<std_srvs::srv::Trigger>("save_waypoints");    
+    save_client_      = nh_->create_client<std_srvs::srv::Trigger>("save_waypoints");
+
+    last_wp_dist_sub_ = nh_->create_subscription<std_msgs::msg::Float64>(
+        "last_wp_dist", 10,
+        [this](std_msgs::msg::Float64::SharedPtr msg) {
+            QMetaObject::invokeMethod(
+                last_wp_dist_value_label_, "setText",
+                Qt::QueuedConnection,
+                Q_ARG(QString, QString::number(msg->data, 'f', 3) + " m")
+        );
+    });
+
+    total_wp_dist_sub_ = nh_->create_subscription<std_msgs::msg::Float64>(
+        "total_wp_dist", 10,
+        [this](std_msgs::msg::Float64::SharedPtr msg) {
+        QMetaObject::invokeMethod(
+            total_wp_dist_value_label_, "setText",
+            Qt::QueuedConnection,
+            Q_ARG(QString, QString::number(msg->data, 'f', 3) + " m")
+        );
+    });
+    
 }
 
 void WaypointEditorPanel::load(const rviz_common::Config &config)

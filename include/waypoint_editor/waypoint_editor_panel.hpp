@@ -10,6 +10,7 @@
 #include <QLabel>
 
 #include <std_srvs/srv/trigger.hpp>
+#include <std_msgs/msg/float64.hpp>
 #include <nav2_msgs/srv/load_map.hpp>
 
 namespace waypoint_editor
@@ -50,6 +51,8 @@ private:
     rclcpp::Client<nav2_msgs::srv::LoadMap>::SharedPtr load_map_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr load_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr save_client_;
+    rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr last_wp_dist_sub_;
+    rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr total_wp_dist_sub_;
 };
     
 } // namespace waypoint_editor

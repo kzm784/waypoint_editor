@@ -1,5 +1,7 @@
 [日本語](README.ja.md) | [English](README.md)
 
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 # Waypoint Editor
 
 ![demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/waypoint_editor_demo.gif)
@@ -9,14 +11,18 @@
 - [Development Environment](#development-environment)
 - [Installation](#installation)
 - [Usage](#usage)
+- [License](#License)
+
 
 ## Overview
 This package provides a tool for intuitively editing and saving waypoints used in robot navigation while referencing a 2D map.  
 The edited waypoints can be saved in **CSV format**.
 
+
 ## Development Environment
 - Ubuntu 22.04 (Jammy Jellyfish)
 - ROS 2 Humble Hawksbill
+
 
 ## Installation
 Run the following commands in your terminal:
@@ -31,7 +37,6 @@ colcon build
 ```
 
 ## Usage
-
 ### 1. Launching the Waypoint Editor  
 Run the following commands to launch the tool:
 
@@ -46,6 +51,7 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 - Click the "**Load Map**" button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
+
 
 ### 3. Adding Waypoints  
 - From the toolbar at the top of RViz2, select "**Add Waypoint**".  
@@ -69,3 +75,10 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 - The waypoints can then be edited again in the same interface.
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)
+
+
+## License
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+This project is licensed under the Apache License, Version 2.0.  
+See the [LICENSE](LICENSE) file for details.

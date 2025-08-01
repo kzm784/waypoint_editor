@@ -3,10 +3,12 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rviz_common/panel.hpp>
+
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QFileDialog>
+#include <QLabel>
+
 #include <std_srvs/srv/trigger.hpp>
 #include <nav2_msgs/srv/load_map.hpp>
 
@@ -26,17 +28,23 @@ public:
     void save(rviz_common::Config config) const override;
 
 protected Q_SLOTS:
-    void onLoad2DMap();
+    void onLoadMapButtonClick();
     void onLoadWaypointsButtonClick();
     void onSaveWaypointsButtonClick();
 
 private:
+    QLabel *status_text_label_;
+    QLabel *status_value_label_;
+    QLabel *last_wp_dist_text_label_;
+    QLabel *last_wp_dist_value_label_;
+    QLabel *total_wp_dist_text_label_;
+    QLabel *total_wp_dist_value_label_;
     QVBoxLayout *layout_;
     QHBoxLayout *logo_layout_;
     QHBoxLayout *button_layout_;
-    QPushButton   *load_2d_map_button_;
-    QPushButton   *load_waypoints_button_;
-    QPushButton   *save_waypoints_button_;
+    QPushButton *load_2d_map_button_;
+    QPushButton *load_waypoints_button_;
+    QPushButton *save_waypoints_button_;
 
     rclcpp::Node::SharedPtr nh_;
     rclcpp::Client<nav2_msgs::srv::LoadMap>::SharedPtr load_map_client_;

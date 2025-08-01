@@ -11,7 +11,6 @@
 #include <std_srvs/srv/trigger.hpp>
 #include <std_msgs/msg/float64.hpp>
 
-#include <QObject>
 #include <vector>
 #include <string>
 
@@ -26,8 +25,6 @@ struct Waypoint
 
 class WaypointEditorTool : public rviz_default_plugins::tools::PoseTool
 {
-    Q_OBJECT
-
 public:
     WaypointEditorTool();
     ~WaypointEditorTool() override;

@@ -139,22 +139,16 @@ void WaypointEditorPanel::onInitialize()
     last_wp_dist_sub_ = nh_->create_subscription<std_msgs::msg::Float64>(
         "last_wp_dist", 10,
         [this](std_msgs::msg::Float64::SharedPtr msg) {
-            QMetaObject::invokeMethod(
-                last_wp_dist_value_label_, "setText",
-                Qt::QueuedConnection,
-                Q_ARG(QString, QString::number(msg->data, 'f', 3) + " m")
-        );
-    });
+            QMetaObject::invokeMethod(last_wp_dist_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, QString::number(msg->data, 'f', 3) + " m"));
+        }
+    );
 
     total_wp_dist_sub_ = nh_->create_subscription<std_msgs::msg::Float64>(
         "total_wp_dist", 10,
         [this](std_msgs::msg::Float64::SharedPtr msg) {
-        QMetaObject::invokeMethod(
-            total_wp_dist_value_label_, "setText",
-            Qt::QueuedConnection,
-            Q_ARG(QString, QString::number(msg->data, 'f', 3) + " m")
-        );
-    });
+            QMetaObject::invokeMethod(total_wp_dist_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, QString::number(msg->data, 'f', 3) + " m"));
+        }
+    );
     
 }
 

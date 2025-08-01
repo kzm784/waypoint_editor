@@ -412,12 +412,8 @@ void WaypointEditorTool::publishLastWpsDist()
 
 void WaypointEditorTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
 {
-    QString qpath = QFileDialog::getSaveFileName(
-        nullptr,
-        tr("Save Waypoints As"),
-        "",
-        tr("CSV Files (*.csv)")
-    );
+    QString qpath = QFileDialog::getSaveFileName(nullptr, tr("Save Waypoints As"), "", tr("CSV Files (*.csv)"));
+
     if (qpath.isEmpty()) {
         res->success = false;
         res->message = "Save canceled by user";
@@ -431,8 +427,7 @@ void WaypointEditorTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv
 
     std::ofstream ofs(path);
     if (!ofs) {
-        QMessageBox::warning(nullptr, tr("Error"),
-            tr("Cannot open file:\n%1").arg(qpath));
+        QMessageBox::warning(nullptr, tr("Error"), tr("Cannot open file:\n%1").arg(qpath));
         res->success = false;
         res->message = "Failed to open file: " + path;
         return;
@@ -484,24 +479,19 @@ void WaypointEditorTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv
 
 void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
 {
-    QString qpath = QFileDialog::getOpenFileName(
-        nullptr,
-        tr("Open Waypoints"),
-        "",
-        tr("CSV Files (*.csv)"));
+    QString qpath = QFileDialog::getOpenFileName(nullptr, tr("Open Waypoints"), "", tr("CSV Files (*.csv)"));
     if (qpath.isEmpty()) {
         res->success = false;
         res->message = "Load canceled by user";
-    return;
+        return;
     }
 
     QFile file(qpath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    QMessageBox::warning(nullptr, tr("Error"),
-        tr("Cannot open file:\n%1").arg(qpath));
-    res->success = false;
-    res->message = "Failed to open file: " + qpath.toStdString();
-    return;
+        QMessageBox::warning(nullptr, tr("Error"), tr("Cannot open file:\n%1").arg(qpath));
+        res->success = false;
+        res->message = "Failed to open file: " + qpath.toStdString();
+        return;
     }
 
     QTextStream in(&file);

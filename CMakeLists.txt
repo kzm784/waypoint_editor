@@ -10,21 +10,19 @@ find_package(rclcpp REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(interactive_markers REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
-set(waypoint_editor_headers
-  include/waypoint_editor/waypoint_editor_tool.hpp
+set(panel_headers
   include/waypoint_editor/waypoint_editor_panel.hpp
 )
-qt5_wrap_cpp(waypoint_editor_moc
-  ${waypoint_editor_headers}
-)
+qt5_wrap_cpp(waypoint_editor_moc ${panel_headers})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -52,10 +50,11 @@ ament_target_dependencies(${PROJECT_NAME}
   rviz_common
   rviz_default_plugins
   pluginlib
-  std_msgs
   interactive_markers
   visualization_msgs
+  geometry_msgs
   std_srvs
+  std_msgs
   nav2_msgs
 )
 
@@ -82,21 +81,22 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(DIRECTORY launch rviz data
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_export_include_directories(include/${PROJECT_NAME})
 ament_export_dependencies(
   rclcpp
   rviz_common
   rviz_default_plugins
   pluginlib
-  std_msgs
   interactive_markers
   visualization_msgs
+  geometry_msgs
   std_srvs
+  std_msgs
   nav2_msgs
-)
-
-install(DIRECTORY launch rviz data
-  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()

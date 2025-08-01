@@ -24,7 +24,7 @@ Run the following commands in your terminal:
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
-git clone https://github.com/kzm784/waypoint_editer.git
+git clone https://github.com/kzm784/waypoint_editor.git
 cd ~/ros2_ws
 rosdep update && rosdep install --from-paths src --ignore-src -y
 colcon build
@@ -38,12 +38,12 @@ Run the following commands to launch the tool:
 ```bash
 cd ~/ros2_ws
 source install/setup.bash
-ros2 launch waypoint_editer waypoint_editer.launch.py
+ros2 launch waypoint_editor waypoint_editor.launch.py
 ```
 
 ### 2. Loading a 2D Map  
 - Use Nav2's `nav2_map_server` to load a 2D map in `.yaml` format.  
-- Click the **Load 2D Map** button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
+- Click the **Load Map** button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
 
@@ -58,14 +58,14 @@ ros2 launch waypoint_editer waypoint_editer.launch.py
 
 
 ### 4. Saving Waypoints  
-- Click **Save Waypoints** button in the bottom-right panel of RViz2.  
+- Click **Save WPs** button in the bottom-right panel of RViz2.  
 - Enter a file name to save the edited waypoints in **CSV format**.
 
 ![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
 
 
 ### 5. Loading Waypoints  
-- Click **Load Waypoints** button in the bottom-right panel of RViz2 and select the previously saved `.csv` file.  
+- Click **Load WPs** button in the bottom-right panel of RViz2 and select the previously saved `.csv` file.  
 - The waypoints can then be edited again in the same interface.
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)

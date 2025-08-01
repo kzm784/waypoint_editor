@@ -43,12 +43,12 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 
 ### 2. 2Dマップの読み込み  
 - Nav2 の `nav2_map_server` を利用して `.yaml` 形式の2Dマップを読み込みます。  
-- RViz2 画面右下のパネルで **Load Map** をクリックし、使用したい `.yaml` ファイルを選択してください。
+- RViz2 画面右下のパネルで "**Load Map**" をクリックし、使用したい `.yaml` ファイルを選択してください。
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
 
 ### 3. ウェイポイントの追加  
-- RViz2 画面上部のツールバーから **Add Waypoint** を選択します。  
+- RViz2 画面上部のツールバーから "**Add Waypoint**" を選択します。  
 - 地図上でドラッグ＆ドロップすることで、位置と向きを指定して新しいウェイポイントを追加できます。  
 - 追加されたウェイポイントは：
   - **ドラッグで移動・回転**が可能
@@ -57,11 +57,11 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 ![adding_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/Adding_waypoints_demo.gif)
 
 ### 4. ウェイポイントの保存  
-- RViz2 画面右下のパネルで **Save WPs** を選択し、保存したいファイル名を入力することで、編集内容を **CSV形式**で保存できます。
+- RViz2 画面右下のパネルで "**Save WPs**" を選択し、保存したいファイル名を入力することで、編集内容を **CSV形式**で保存できます。
 
 ![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
 
 ### 5. ウェイポイントの読み込み  
-- **Load WPs** ボタンから、過去に保存した `.csv` ファイルを読み込み、ウェイポイントの再編集が可能です。
+- "**Load WPs**" ボタンから、過去に保存した `.csv` ファイルを読み込み、ウェイポイントの再編集が可能です。
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)

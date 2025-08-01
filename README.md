@@ -43,12 +43,12 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 
 ### 2. Loading a 2D Map  
 - Use Nav2's `nav2_map_server` to load a 2D map in `.yaml` format.  
-- Click the **Load Map** button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
+- Click the "**Load Map**" button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
 
 ### 3. Adding Waypoints  
-- From the toolbar at the top of RViz2, select **Add Waypoint**.  
+- From the toolbar at the top of RViz2, select "**Add Waypoint**".  
 - Click and drag on the map to add a new waypoint with the desired position and orientation.  
 - Once added, each waypoint can:
   - Be **moved or rotated** via drag operations
@@ -58,14 +58,14 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 
 
 ### 4. Saving Waypoints  
-- Click **Save WPs** button in the bottom-right panel of RViz2.  
+- Click "**Save WPs**" button in the bottom-right panel of RViz2.  
 - Enter a file name to save the edited waypoints in **CSV format**.
 
 ![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
 
 
 ### 5. Loading Waypoints  
-- Click **Load WPs** button in the bottom-right panel of RViz2 and select the previously saved `.csv` file.  
+- Click "**Load WPs**" button in the bottom-right panel of RViz2 and select the previously saved `.csv` file.  
 - The waypoints can then be edited again in the same interface.
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)

@@ -1,18 +1,30 @@
 #include <rclcpp/rclcpp.hpp>
-#include <rviz_common/tool.hpp>
-#include <nav2_rviz_plugins/goal_common.hpp>
+#include <rviz_default_plugins/tools/pose/pose_tool.hpp>
 #include <rviz_common/display_context.hpp>
-#include <rviz_common/viewport_mouse_event.hpp>
-#include <rviz_common/render_panel.hpp>
-#include <rviz_common/tool_manager.hpp>
+#include <interactive_markers/interactive_marker_server.hpp>
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <visualization_msgs/msg/interactive_marker_control.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/menu_entry.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <std_srvs/srv/trigger.hpp>
+#include <std_msgs/msg/float64.hpp>
+
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFile>
 #include <QTextStream>
+#include <QStringList>
+
+#include <vector>
+#include <string>
+#include <cmath>
 #include <fstream>
+#include <sstream>
+#include <algorithm>
 
 #include "waypoint_editor/waypoint_editor_tool.hpp"
 
@@ -31,7 +43,6 @@ void WaypointEditorTool::onInitialize()
     setName("Add Waypoint");
 
     nh_ = context_->getRosNodeAbstraction().lock()->get_raw_node();
-    projection_finder_ = std::make_shared<rviz_rendering::ViewportProjectionFinder>();
     server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(
         "interactive_marker_server",
         nh_,

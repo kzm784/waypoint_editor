@@ -9,28 +9,30 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>rviz2</build_depend>
-  <build_depend>pluginlib</build_depend>
-  <build_depend>libqt5-core</build_depend>
-  <build_depend>libqt5-gui</build_depend>
-  <build_depend>libqt5-widgets</build_depend>
-  <build_depend>qtbase5-dev</build_depend>
   <build_depend>rclcpp</build_depend>
+  <build_depend>pluginlib</build_depend>
   <build_depend>rviz_common</build_depend>
   <build_depend>rviz_default_plugins</build_depend>
   <build_depend>interactive_markers</build_depend>
-  <build_depend>std_srvs</build_depend>
-  <build_depend>nav2_msgs</build_depend>
-
-  <build_depend>std_msgs</build_depend>
   <build_depend>visualization_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>nav2_msgs</build_depend>   
 
-  <exec_depend>rviz2</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
   <exec_depend>pluginlib</exec_depend>
-
+  <exec_depend>rviz_common</exec_depend>
+  <exec_depend>rviz_default_plugins</exec_depend>
+  <exec_depend>interactive_markers</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>std_srv</exec_depend>
-  <exec_depend>nav2_srv</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>rviz2</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

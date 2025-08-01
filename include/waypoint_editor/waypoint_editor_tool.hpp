@@ -12,6 +12,7 @@
 #include <visualization_msgs/msg/interactive_marker_control.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <std_srvs/srv/trigger.hpp>
+#include <std_msgs/msg/float64.hpp>
 #include <QObject>
 
 namespace waypoint_editor
@@ -43,6 +44,8 @@ public:
     void handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> req, std::shared_ptr<std_srvs::srv::Trigger::Response> res);
     void handleLoadWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> req, std::shared_ptr<std_srvs::srv::Trigger::Response> res);
     void publishLineMarker();
+    void publishTotalWpsDist();
+    void publishLastWpsDist();
 
 
 private Q_SLOTS:  
@@ -52,11 +55,15 @@ private:
     std::shared_ptr<rviz_rendering::ViewportProjectionFinder> projection_finder_;
     std::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr line_pub_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr total_wp_dist_pub_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr last_wp_dist_pub_;
     rclcpp::TimerBase::SharedPtr line_timer_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr save_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr load_service_;
 
     std::vector<Waypoint> waypoints_;
+    double total_wp_dist_{0.0};
+    double last_wp_dist_{0.0};
 };
     
 } // namespace waypoint_editor

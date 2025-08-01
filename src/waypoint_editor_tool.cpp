@@ -38,11 +38,6 @@ void WaypointEditorTool::onInitialize()
         rclcpp::SystemDefaultsQoS(),
         rclcpp::SystemDefaultsQoS()
     );
-    line_pub_ = nh_->create_publisher<visualization_msgs::msg::Marker>("waypoint_line", 10);
-    line_timer_ = nh_->create_wall_timer(
-        std::chrono::milliseconds(500),
-        std::bind(&WaypointEditorTool::publishLineMarker, this)
-    );
     save_service_ = nh_->create_service<std_srvs::srv::Trigger>(
         "save_waypoints",
         std::bind(&WaypointEditorTool::handleSaveWaypoints, this, _1, _2)
@@ -50,6 +45,18 @@ void WaypointEditorTool::onInitialize()
     load_service_ = nh_->create_service<std_srvs::srv::Trigger>(
         "load_waypoints",
         std::bind(&WaypointEditorTool::handleLoadWaypoints, this, _1, _2)
+    );
+
+    line_pub_ = nh_->create_publisher<visualization_msgs::msg::Marker>("waypoint_line", 10);
+    total_wp_dist_pub_ = nh_->create_publisher<std_msgs::msg::Float64>("total_wp_dist", 10);
+    last_wp_dist_pub_  = nh_->create_publisher<std_msgs::msg::Float64>("last_wp_dist", 10);
+    line_timer_ = nh_->create_wall_timer(
+        std::chrono::milliseconds(500),
+        [this]() {
+            publishLineMarker();
+            publishTotalWpsDist();
+            publishLastWpsDist();
+        }
     );
 
     waypoints_.clear();
@@ -81,6 +88,15 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
     server_->applyChanges();
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
     
+    if (waypoints_.size() >= 2) {
+        const auto &p0 = waypoints_[waypoints_.size()-2].pose.pose.position;
+        const auto &p1 = waypoints_.back().pose.pose.position;
+        double dx = p1.x - p0.x;
+        double dy = p1.y - p0.y;
+        last_wp_dist_ = std::hypot(dx, dy);
+        total_wp_dist_ += last_wp_dist_;
+    }
+
     deactivate();
 }
 
@@ -218,21 +234,50 @@ void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualizati
     switch (fb->event_type)
     {
         case visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE:
-            waypoints_[id].pose.pose.position = fb->pose.position;
+        {
+            waypoints_[id].pose.pose.position     = fb->pose.position;
             waypoints_[id].pose.pose.orientation.z = fb->pose.orientation.z;
             waypoints_[id].pose.pose.orientation.w = fb->pose.orientation.w;
 
             server_->setPose(fb->marker_name, fb->pose);
             server_->applyChanges();
+
+            {
+                double new_total = 0.0;
+                for (size_t i = 1; i < waypoints_.size(); ++i) {
+                    const auto &a = waypoints_[i-1].pose.pose.position;
+                    const auto &b = waypoints_[i].pose.pose.position;
+                    new_total += std::hypot(b.x - a.x, b.y - a.y);
+                }
+                total_wp_dist_ = new_total;
+            }
+
+            {
+                double segment = 0.0;
+                if (id > 0) {
+                    const auto &p0 = waypoints_[id-1].pose.pose.position;
+                    const auto &p1 = waypoints_[id].pose.pose.position;
+                    segment = std::hypot(p1.x - p0.x, p1.y - p0.y);
+                }
+                else if (id + 1 < static_cast<int>(waypoints_.size())) {
+                    const auto &p0 = waypoints_[id].pose.pose.position;
+                    const auto &p1 = waypoints_[id+1].pose.pose.position;
+                    segment = std::hypot(p1.x - p0.x, p1.y - p0.y);
+                }
+                last_wp_dist_ = segment;
+            }
             break;
+        }
 
         case visualization_msgs::msg::InteractiveMarkerFeedback::MENU_SELECT:
+        {
             processMenuControl(fb);
             break;
+        }
 
         default:
             break;
-    }    
+    }
 }
 
 void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> & fb)
@@ -338,6 +383,20 @@ void WaypointEditorTool::publishLineMarker()
     }
 
     line_pub_->publish(line);
+}
+
+void WaypointEditorTool::publishTotalWpsDist()
+{
+    std_msgs::msg::Float64 msg;
+    msg.data = total_wp_dist_;
+    total_wp_dist_pub_->publish(msg);
+}
+
+void WaypointEditorTool::publishLastWpsDist()
+{
+    std_msgs::msg::Float64 msg;
+    msg.data = last_wp_dist_;
+    last_wp_dist_pub_->publish(msg);
 }
 
 void WaypointEditorTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
@@ -473,6 +532,20 @@ void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv
         waypoints_.push_back(std::move(wp));
     }
     file.close();
+
+    total_wp_dist_ = 0.0;
+    last_wp_dist_  = 0.0;
+    const size_t n = waypoints_.size();
+    if (n >= 2) {
+        for (size_t i = 1; i < n; ++i) {
+            const auto &a = waypoints_[i-1].pose.pose.position;
+            const auto &b = waypoints_[i].pose.pose.position;
+            total_wp_dist_ += std::hypot(b.x - a.x, b.y - a.y);
+        }
+        const auto &p0 = waypoints_[n-2].pose.pose.position;
+        const auto &p1 = waypoints_[n-1].pose.pose.position;
+        last_wp_dist_ = std::hypot(p1.x - p0.x, p1.y - p0.y);
+    }
 
     updateWaypointMarker();
 

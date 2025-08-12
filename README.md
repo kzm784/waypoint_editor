@@ -1,6 +1,6 @@
 [日本語](README.ja.md) | [English](README.md)
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Build on Humble](https://github.com/kzm784/waypoint_editor/actions/workflows/main.yml/badge.svg)](https://github.com/kzm784/waypoint_editor/actions/workflows/main.yml)
 
 # Waypoint Editor
 

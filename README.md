@@ -1,7 +1,9 @@
 [日本語](README.ja.md) | [English](README.md)
 
 [![ROS 2 Humble build](https://github.com/kzm784/waypoint_editor/actions/workflows/humble.yml/badge.svg?branch=main&label=ROS%202%20Humble%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/humble.yml)
+
 [![ROS 2 Jazzy build](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy.yml/badge.svg?branch=main&label=ROS%202%20Jazzy%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy.yml)
+
 
 
 # Waypoint Editor

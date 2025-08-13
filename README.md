@@ -3,10 +3,6 @@
 [![ROS 2 Humble build](https://github.com/kzm784/waypoint_editor/actions/workflows/humble_build.yml/badge.svg?branch=main&label=ROS%202%20Humble%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/humble_build.yml)
 [![ROS 2 Jazzy build](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy_build.yml/badge.svg?branch=main&label=ROS%202%20Jazzy%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy_build.yml)
 
-
-
-
-
 # Waypoint Editor
 
 ![demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/waypoint_editor_demo.gif)

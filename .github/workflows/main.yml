@@ -38,3 +38,34 @@ jobs:
           apt-get install -y python3-colcon-common-extensions
           cd ~/ros2_ws
           colcon build
+  
+  jazzy_build:
+    name: Build on Jazzy
+    runs-on: ubuntu-24.04
+    container: ros:jazzy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy repository
+        run: |
+          mkdir -p ~/ros2_ws/src/waypoint_editor
+          cp -rf . ~/ros2_ws/src/waypoint_editor
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          apt-get update
+          apt-get install -y python3-rosdep git
+          rosdep update || (rosdep init && rosdep update)
+          cd ~/ros2_ws/src
+          rosdep install -r -y --from-paths . --ignore-src
+
+      - name: Build package
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          apt-get update
+          apt-get install -y python3-colcon-common-extensions
+          cd ~/ros2_ws
+          colcon build

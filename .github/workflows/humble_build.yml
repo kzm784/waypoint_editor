@@ -1,0 +1,40 @@
+name: build (ROS 2 Humble)
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # UTC -> JST 07:00
+  push:
+    branches:
+      - main
+      
+jobs:
+  humble_build:
+    name: Build on Humble
+    runs-on: ubuntu-22.04
+    container: ros:humble
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy repository
+        run: |
+          mkdir -p ~/ros2_ws/src/waypoint_editor
+          cp -rf . ~/ros2_ws/src/waypoint_editor
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          apt-get update
+          apt-get install -y python3-rosdep git
+          rosdep update || (rosdep init && rosdep update)
+          cd ~/ros2_ws/src
+          rosdep install -r -y --from-paths . --ignore-src
+
+      - name: Build package
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          apt-get update
+          apt-get install -y python3-colcon-common-extensions
+          cd ~/ros2_ws
+          colcon build

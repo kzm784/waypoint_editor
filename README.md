@@ -1,6 +1,7 @@
 [日本語](README.ja.md) | [English](README.md)
 
-[![Build on Humble](https://github.com/kzm784/waypoint_editor/actions/workflows/main.yml/badge.svg)](https://github.com/kzm784/waypoint_editor/actions/workflows/main.yml)
+[![humble build](https://github.com/kzm784/waypoint_editor/actions/workflows/humble_build.yml/badge.svg?branch=main&label=humble%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/humble_build.yml)
+[![jazzy build](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy_build.yml/badge.svg?branch=main&label=jazzy%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy_build.yml)
 
 # Waypoint Editor
 

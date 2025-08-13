@@ -1,8 +1,9 @@
 [日本語](README.ja.md) | [English](README.md)
 
-[![ROS 2 Humble build](https://github.com/kzm784/waypoint_editor/actions/workflows/humble.yml/badge.svg?branch=main&label=ROS%202%20Humble%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/humble.yml)
+[![humble build](https://github.com/kzm784/waypoint_editor/actions/workflows/humble.yml/badge.svg?branch=main&label=humble%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/humble.yml)
+[![jazzy build](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy.yml/badge.svg?branch=main&label=jazzy%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-[![ROS 2 Jazzy build](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy.yml/badge.svg?branch=main&label=ROS%202%20Jazzy%20build)](https://github.com/kzm784/waypoint_editor/actions/workflows/jazzy.yml)
 
 
 

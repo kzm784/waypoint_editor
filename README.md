@@ -47,8 +47,9 @@ source install/setup.bash
 ros2 launch waypoint_editor waypoint_editor.launch.py
 ```
 
-### 2. Loading a 2D Map  
+### 2. Loading a Map (2D / 3D)  
 - Use Nav2's `nav2_map_server` to load a 2D map in `.yaml` format.  
+- You can also load a 3D map in `.pcd` format.  
 - Click the "**Load Map**" button in the bottom-right panel of RViz2 and select the desired `.yaml` file.
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)

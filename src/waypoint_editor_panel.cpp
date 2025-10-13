@@ -3,6 +3,11 @@
 #include <rviz_common/load_resource.hpp>
 #include <std_srvs/srv/trigger.hpp>
 #include <nav2_msgs/srv/load_map.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+
+#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -150,6 +155,7 @@ void WaypointEditorPanel::onInitialize()
         }
     );
     
+    cloud_pub_ = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("map_cloud", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 }
 
 void WaypointEditorPanel::load(const rviz_common::Config &config)
@@ -166,31 +172,50 @@ void WaypointEditorPanel::onLoadMapButtonClick()
 {
     QString qpath = QFileDialog::getOpenFileName(
         this,
-        tr("Open 2D Map YAML"),
+        tr("Open Map YAML (YAML / PCD)"),
         "",
-        tr("YAML Files (*.yaml)"));
+        tr("Map Files (*.yaml *.pcd);; YAML (*.yaml);; PCD (*.pcd)"));
 
     if (qpath.isEmpty()) {
         return;
     }
 
-    if (!load_map_client_->wait_for_service(std::chrono::seconds(2))) {
-        return;
-    }
-    auto req = std::make_shared<nav2_msgs::srv::LoadMap::Request>();
-    req->map_url = qpath.toStdString();
+    const auto path = qpath.toStdString();
+    auto lower = qpath.toLower();
+    if (lower.endsWith(".yaml")) {
+        if (!load_map_client_->wait_for_service(std::chrono::seconds(2))) {
+            return;
+        }
+        auto req = std::make_shared<nav2_msgs::srv::LoadMap::Request>();
+        req->map_url = qpath.toStdString();
+        load_map_client_->async_send_request(req,
+            [this](rclcpp::Client<nav2_msgs::srv::LoadMap>::SharedFuture future) {
+                bool ok = false;
+                try {
+                    auto response = future.get();
+                    ok = true;
+                } catch (const std::exception &e) {
+                    ok = false;
+                }
+                QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, ok ? tr("Loaded 2D Map") : tr("Failed to load 2D Map")));
+            });        
+    } else if (lower.endsWith(".pcd")) {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+        int ret = pcl::io::loadPCDFile<pcl::PointXYZ>(path, *cloud);
+        if (ret != 0 || cloud->empty()) {
+            QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, tr("Failed to load 3D Map")));
+            return;
+        }
 
-    load_map_client_->async_send_request(req,
-        [this](rclcpp::Client<nav2_msgs::srv::LoadMap>::SharedFuture future) {
-            bool ok = false;
-            try {
-                auto response = future.get();
-                ok = true;
-            } catch (const std::exception &e) {
-                ok = false;
-            }
-            QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, ok ? tr("Loaded Map") : tr("Failed to load Map")));
-        });
+        sensor_msgs::msg::PointCloud2 msg;
+        pcl::toROSMsg(*cloud, msg);
+        msg.header.stamp = nh_->get_clock()->now();
+        msg.header.frame_id = "map";
+        cloud_pub_->publish(msg);
+        QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, tr("Loaded 3D Map")));
+    } else {
+        QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, tr("Unsupported file type")));  
+    }
 }
 
 void WaypointEditorPanel::onLoadWaypointsButtonClick()

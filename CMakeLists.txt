@@ -16,6 +16,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(pcl_conversions REQUIRED)
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
@@ -56,6 +58,8 @@ ament_target_dependencies(${PROJECT_NAME}
   std_srvs
   std_msgs
   nav2_msgs
+  sensor_msgs
+  pcl_conversions
 )
 
 pluginlib_export_plugin_description_file(rviz_common plugin_description.xml)

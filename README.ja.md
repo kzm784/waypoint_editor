@@ -48,9 +48,10 @@ source install/setup.bash
 ros2 launch waypoint_editor waypoint_editor.launch.py
 ```
 
-### 2. 2Dマップの読み込み  
+### 2. マップの読み込み (2D / 3D)  
 - Nav2 の `nav2_map_server` を利用して `.yaml` 形式の2Dマップを読み込みます。  
-- RViz2 画面右下のパネルで "**Load Map**" をクリックし、使用したい `.yaml` ファイルを選択してください。
+-  `.pcd`形式の3Dマップを読み込むことも可能です。  
+- RViz2 画面右下のパネルで "**Load Map**" をクリックし、使用したい `.yaml` もしくは `.pcd`ファイルを選択してください。
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
 

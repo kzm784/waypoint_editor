@@ -10,6 +10,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>rclcpp</build_depend>
+  <build_depend>rclcpp_action</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>rviz_common</build_depend>
   <build_depend>rviz_default_plugins</build_depend>
@@ -23,6 +24,7 @@
   <build_depend>pcl_conversions</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclcpp_action</exec_depend>
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>rviz_common</exec_depend>
   <exec_depend>rviz_default_plugins</exec_depend>

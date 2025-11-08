@@ -85,7 +85,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch rviz data
+install(DIRECTORY launch config rviz data
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -43,6 +43,12 @@ void WaypointEditorTool::onInitialize()
     setName("Add Waypoint");
 
     nh_ = context_->getRosNodeAbstraction().lock()->get_raw_node();
+    
+    nh_->declare_parameter<bool>("enable_record", false);
+    nh_->declare_parameter<float>("record_interval", 1.0);
+    nh_->get_parameter("enable_record", enable_record_);
+    nh_->get_parameter("record_interval", record_interval_);
+    
     server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(
         "interactive_marker_server",
         nh_,
@@ -61,6 +67,12 @@ void WaypointEditorTool::onInitialize()
     line_pub_ = nh_->create_publisher<visualization_msgs::msg::Marker>("waypoint_line", 10);
     total_wp_dist_pub_ = nh_->create_publisher<std_msgs::msg::Float64>("total_wp_dist", 10);
     last_wp_dist_pub_  = nh_->create_publisher<std_msgs::msg::Float64>("last_wp_dist", 10);
+
+    pose_sub_ = nh_->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+        "current_pose", 10, 
+        std::bind(&WaypointEditorTool::poseSubCallback, this, std::placeholders::_1)
+    );
+
     line_timer_ = nh_->create_wall_timer(
         std::chrono::milliseconds(500),
         [this]() {
@@ -71,6 +83,34 @@ void WaypointEditorTool::onInitialize()
     );
 
     waypoints_.clear();
+}
+
+void WaypointEditorTool::poseSubCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
+{
+    if (!enable_record_) return;
+
+    if (first_pose_) {
+        last_pose_ = *msg;
+        first_pose_ = false;
+    }
+
+    const auto &cur = msg->pose.pose.position;
+    const auto &prev = last_pose_.pose.pose.position;
+    double dx = cur.x - prev.x;
+    double dy = cur.y - prev.y;
+    double dist = std::hypot(dx, dy);
+
+    if (dist >= record_interval_) {
+        const auto &q = msg->pose.pose.orientation;
+        tf2::Quaternion quat(q.x, q.y, q.z, q.w);
+        double roll, pitch, yaw;
+        tf2::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+
+        onPoseSet(cur.x, cur.y, yaw);
+        last_pose_ = *msg;
+
+        RCLCPP_INFO(nh_->get_logger(), "Auto waypoint recorded at (%.2f, %.2f)", cur.x, cur.y);
+    }
 }
 
 void WaypointEditorTool::onPoseSet(double x, double y, double theta)

@@ -8,6 +8,7 @@
 #include <visualization_msgs/msg/interactive_marker_control.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <std_srvs/srv/trigger.hpp>
 #include <std_msgs/msg/float64.hpp>
 
@@ -43,6 +44,7 @@ public:
     void publishLineMarker();
     void publishTotalWpsDist();
     void publishLastWpsDist();
+    void poseSubCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg);
 
 private:
     rclcpp::Node::SharedPtr nh_;
@@ -50,13 +52,19 @@ private:
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr line_pub_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr total_wp_dist_pub_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr last_wp_dist_pub_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pose_sub_;
     rclcpp::TimerBase::SharedPtr line_timer_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr save_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr load_service_;
 
     std::vector<Waypoint> waypoints_;
+    bool first_pose_{true};
+    geometry_msgs::msg::PoseWithCovarianceStamped last_pose_;
     double total_wp_dist_{0.0};
     double last_wp_dist_{0.0};
+
+    bool enable_record_{false};
+    float record_interval_{1.0};
 };
 
 } // namespace waypoint_editor

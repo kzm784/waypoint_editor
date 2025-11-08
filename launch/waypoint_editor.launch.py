@@ -8,6 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     pkg = get_package_share_directory('waypoint_editor')
     rviz_config = os.path.join(pkg, 'rviz', 'rviz_waypoint_editor.rviz')
+    waypoint_editor_config = os.path.join(pkg, 'config', 'config_waypoint_editor.yaml')
 
     declare_map_yaml = DeclareLaunchArgument(
         'map_yaml', default_value=os.path.join(pkg, 'data', 'sample_map.yaml'),
@@ -39,6 +40,8 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz2',
         output='screen',
+        remappings=[('current_pose', 'pcl_pose')],
+        parameters=[waypoint_editor_config],
         arguments=['-d', rviz_config]
     )
 

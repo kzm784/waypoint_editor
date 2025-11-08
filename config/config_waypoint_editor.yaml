@@ -1,0 +1,4 @@
+rviz2:
+  ros__parameters:
+    enable_record: true
+    record_interval: 4.0

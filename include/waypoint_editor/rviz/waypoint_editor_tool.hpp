@@ -49,7 +49,6 @@ private:
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr line_pub_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr total_wp_dist_pub_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr last_wp_dist_pub_;
-    rclcpp::TimerBase::SharedPtr line_timer_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr save_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr load_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr undo_service_;

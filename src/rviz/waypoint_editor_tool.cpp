@@ -17,7 +17,6 @@
 #include <QFileDialog>
 #include <QString>
 #include <algorithm>
-#include <chrono>
 #include <string>
 #include <vector>
 
@@ -66,15 +65,10 @@ void WaypointEditorTool::onInitialize()
     line_pub_ = nh_->create_publisher<visualization_msgs::msg::Marker>("waypoint_line", 10);
     total_wp_dist_pub_ = nh_->create_publisher<std_msgs::msg::Float64>("total_wp_dist", 10);
     last_wp_dist_pub_  = nh_->create_publisher<std_msgs::msg::Float64>("last_wp_dist", 10);
-    line_timer_ = nh_->create_wall_timer(
-        std::chrono::milliseconds(500),
-        [this]() {
-            publishRangeMetrics();
-        }
-    );
 
     waypoint_sequence_.clear();
     pose_dirty_ = false;
+    publishRangeMetrics();
 }
 
 void WaypointEditorTool::onPoseSet(double x, double y, double theta)
@@ -102,6 +96,7 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
     waypoint_sequence_.snapshotHistory();
     pose_dirty_ = false;
+    publishRangeMetrics();
 
     deactivate();
 }
@@ -254,6 +249,7 @@ void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualizati
 
             server_->setPose(fb->marker_name, fb->pose);
             server_->applyChanges();
+            publishRangeMetrics();
             break;
         }
 
@@ -292,6 +288,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
             updateWaypointMarker();
             waypoint_sequence_.snapshotHistory();
             pose_dirty_ = false;
+            publishRangeMetrics();
             RCLCPP_INFO(nh_->get_logger(), "Deleted waypoint %d", id);
             break;
 
@@ -318,6 +315,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                     updateWaypointMarker();
                     waypoint_sequence_.snapshotHistory();
                     pose_dirty_ = false;
+                    publishRangeMetrics();
                     RCLCPP_INFO(nh_->get_logger(), "Changed waypoint id %d to %d", id, insert_id);
                 } else {
                     const int max_index = std::max(0, static_cast<int>(waypoint_sequence_.size()) - 1);
@@ -354,6 +352,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                 updateWaypointMarker();
                 waypoint_sequence_.snapshotHistory();
                 pose_dirty_ = false;
+                publishRangeMetrics();
                 RCLCPP_INFO(nh_->get_logger(), "Updated command of waypoint %d to '%s'", id, waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command.c_str());
             }
         }
@@ -537,6 +536,7 @@ void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv
     waypoint_sequence_.snapshotHistory();
     pose_dirty_ = false;
     updateWaypointMarker();
+    publishRangeMetrics();
 
     res->success = true;
     res->message = "Loaded " + std::to_string(waypoint_sequence_.size()) + " waypoints from " + path;

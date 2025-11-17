@@ -17,6 +17,7 @@
 #include <QFileDialog>
 #include <QString>
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -68,6 +69,7 @@ void WaypointEditorTool::onInitialize()
 
     waypoint_sequence_.clear();
     pose_dirty_ = false;
+    updateLastDistanceFromWaypoint(0);
     publishRangeMetrics();
 }
 
@@ -96,6 +98,7 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
     waypoint_sequence_.snapshotHistory();
     pose_dirty_ = false;
+    updateLastDistanceFromWaypoint(new_id);
     publishRangeMetrics();
 
     deactivate();
@@ -249,6 +252,7 @@ void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualizati
 
             server_->setPose(fb->marker_name, fb->pose);
             server_->applyChanges();
+            updateLastDistanceFromWaypoint(id);
             publishRangeMetrics();
             break;
         }
@@ -288,6 +292,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
             updateWaypointMarker();
             waypoint_sequence_.snapshotHistory();
             pose_dirty_ = false;
+            updateLastDistanceFromWaypoint(id);
             publishRangeMetrics();
             RCLCPP_INFO(nh_->get_logger(), "Deleted waypoint %d", id);
             break;
@@ -315,6 +320,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                     updateWaypointMarker();
                     waypoint_sequence_.snapshotHistory();
                     pose_dirty_ = false;
+                    updateLastDistanceFromWaypoint(insert_id);
                     publishRangeMetrics();
                     RCLCPP_INFO(nh_->get_logger(), "Changed waypoint id %d to %d", id, insert_id);
                 } else {
@@ -352,6 +358,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                 updateWaypointMarker();
                 waypoint_sequence_.snapshotHistory();
                 pose_dirty_ = false;
+                updateLastDistanceFromWaypoint(id);
                 publishRangeMetrics();
                 RCLCPP_INFO(nh_->get_logger(), "Updated command of waypoint %d to '%s'", id, waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command.c_str());
             }
@@ -360,6 +367,38 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
 
       default:
             break;
+    }
+}
+
+double WaypointEditorTool::computeSegmentDistance(std::size_t first, std::size_t second) const
+{
+    const auto &waypoints = waypoint_sequence_.waypoints();
+    if (first >= waypoints.size() || second >= waypoints.size()) {
+        return 0.0;
+    }
+    const auto &p0 = waypoints[first].pose.pose.position;
+    const auto &p1 = waypoints[second].pose.pose.position;
+    return std::hypot(p1.x - p0.x, p1.y - p0.y);
+}
+
+void WaypointEditorTool::updateLastDistanceFromWaypoint(int waypoint_index)
+{
+    const auto size = waypoint_sequence_.size();
+    if (size < 2) {
+        last_displayed_distance_ = 0.0;
+        return;
+    }
+
+    const int max_index = static_cast<int>(size) - 1;
+    const int clamped = std::max(0, std::min(waypoint_index, max_index));
+    const std::size_t idx = static_cast<std::size_t>(clamped);
+
+    if (idx > 0) {
+        last_displayed_distance_ = computeSegmentDistance(idx - 1, idx);
+    } else if (idx + 1 < size) {
+        last_displayed_distance_ = computeSegmentDistance(idx, idx + 1);
+    } else {
+        last_displayed_distance_ = computeSegmentDistance(size - 2, size - 1);
     }
 }
 
@@ -398,7 +437,7 @@ void WaypointEditorTool::publishTotalWpsDist()
 void WaypointEditorTool::publishLastWpsDist()
 {
     std_msgs::msg::Float64 msg;
-    msg.data = waypoint_sequence_.lastSegmentDistance();
+    msg.data = last_displayed_distance_;
     last_wp_dist_pub_->publish(msg);
 }
 
@@ -536,6 +575,7 @@ void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv
     waypoint_sequence_.snapshotHistory();
     pose_dirty_ = false;
     updateWaypointMarker();
+    updateLastDistanceFromWaypoint(static_cast<int>(waypoint_sequence_.size()) - 1);
     publishRangeMetrics();
 
     res->success = true;
@@ -551,6 +591,7 @@ void WaypointEditorTool::handleUndoWaypoints(const std::shared_ptr<std_srvs::srv
     }
     pose_dirty_ = false;
     updateWaypointMarker();
+    updateLastDistanceFromWaypoint(static_cast<int>(waypoint_sequence_.size()) - 1);
     publishRangeMetrics();
     res->success = true;
     res->message = "Undid waypoint change";
@@ -565,6 +606,7 @@ void WaypointEditorTool::handleRedoWaypoints(const std::shared_ptr<std_srvs::srv
     }
     pose_dirty_ = false;
     updateWaypointMarker();
+    updateLastDistanceFromWaypoint(static_cast<int>(waypoint_sequence_.size()) - 1);
     publishRangeMetrics();
     res->success = true;
     res->message = "Redid waypoint change";

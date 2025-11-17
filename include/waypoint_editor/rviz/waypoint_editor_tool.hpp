@@ -56,6 +56,10 @@ private:
 
     WaypointSequence waypoint_sequence_;
     bool pose_dirty_{false};
+    double last_displayed_distance_{0.0};
+
+    void updateLastDistanceFromWaypoint(int waypoint_index);
+    double computeSegmentDistance(std::size_t first, std::size_t second) const;
 };
 
 } // namespace waypoint_editor

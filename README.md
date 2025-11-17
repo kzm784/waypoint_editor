@@ -76,6 +76,9 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 - Click "**Load WPs**" button in the bottom-right panel of RViz2 and select the previously saved `.csv` or `.yaml` file.  
 - The waypoints can then be edited again in the same interface.
 
+### 6. Undo / Redo  
+- Use the panel's "**Undo**" and "**Redo**" buttons to step backward or forward through waypoint edits (moving, rotating, deleting, ID changes, or command edits).
+
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)
 
 

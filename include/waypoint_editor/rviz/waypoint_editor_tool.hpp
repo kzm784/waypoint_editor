@@ -34,6 +34,8 @@ public:
     void processMenuControl(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> &fb);
     void handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> req, std::shared_ptr<std_srvs::srv::Trigger::Response> res);
     void handleLoadWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> req, std::shared_ptr<std_srvs::srv::Trigger::Response> res);
+    void handleUndoWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> req, std::shared_ptr<std_srvs::srv::Trigger::Response> res);
+    void handleRedoWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> req, std::shared_ptr<std_srvs::srv::Trigger::Response> res);
     void publishLineMarker();
     void publishTotalWpsDist();
     void publishLastWpsDist();
@@ -50,8 +52,11 @@ private:
     rclcpp::TimerBase::SharedPtr line_timer_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr save_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr load_service_;
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr undo_service_;
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr redo_service_;
 
     WaypointSequence waypoint_sequence_;
+    bool pose_dirty_{false};
 };
 
 } // namespace waypoint_editor

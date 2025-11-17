@@ -76,6 +76,9 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 ### 5. ウェイポイントの読み込み  
 - "**Load WPs**" ボタンから、保存しておいた `.csv` または `.yaml` ファイルを読み込み、ウェイポイントの再編集が可能です。
 
+### 6. 操作の取り消し / やり直し  
+- パネルの "**Undo**" / "**Redo**" ボタンで、移動・回転・削除・ID変更・コマンド編集といった操作を戻したり進めたりできます。
+
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)
 
 

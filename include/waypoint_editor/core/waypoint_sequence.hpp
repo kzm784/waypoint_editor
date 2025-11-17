@@ -38,6 +38,11 @@ public:
     double totalDistance() const noexcept { return total_distance_; }
     double lastSegmentDistance() const noexcept { return last_segment_distance_; }
 
+    void resetHistory();
+    void snapshotHistory();
+    bool undo();
+    bool redo();
+
 private:
     double computeSegment(std::size_t first_index) const;
     void recalcDistances();
@@ -45,6 +50,8 @@ private:
     Container waypoints_;
     double total_distance_{0.0};
     double last_segment_distance_{0.0};
+    std::vector<Container> history_;
+    std::size_t history_index_{0};
 };
 
 }  // namespace waypoint_editor

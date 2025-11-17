@@ -33,6 +33,8 @@ protected Q_SLOTS:
     void onLoadMapButtonClick();
     void onLoadWaypointsButtonClick();
     void onSaveWaypointsButtonClick();
+    void onUndoWaypointsButtonClick();
+    void onRedoWaypointsButtonClick();
 
 private:
     QLabel *status_text_label_;
@@ -47,11 +49,15 @@ private:
     QPushButton *load_2d_map_button_;
     QPushButton *load_waypoints_button_;
     QPushButton *save_waypoints_button_;
+    QPushButton *undo_button_;
+    QPushButton *redo_button_;
 
     rclcpp::Node::SharedPtr nh_;
     rclcpp::Client<nav2_msgs::srv::LoadMap>::SharedPtr load_map_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr load_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr save_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr undo_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr redo_client_;
     rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr last_wp_dist_sub_;
     rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr total_wp_dist_sub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_pub_;

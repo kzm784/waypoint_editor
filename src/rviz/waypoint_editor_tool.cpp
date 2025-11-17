@@ -50,6 +50,14 @@ void WaypointEditorTool::onInitialize()
         "save_waypoints",
         std::bind(&WaypointEditorTool::handleSaveWaypoints, this, _1, _2)
     );
+    undo_service_ = nh_->create_service<std_srvs::srv::Trigger>(
+        "undo_waypoints",
+        std::bind(&WaypointEditorTool::handleUndoWaypoints, this, _1, _2)
+    );
+    redo_service_ = nh_->create_service<std_srvs::srv::Trigger>(
+        "redo_waypoints",
+        std::bind(&WaypointEditorTool::handleRedoWaypoints, this, _1, _2)
+    );
     load_service_ = nh_->create_service<std_srvs::srv::Trigger>(
         "load_waypoints",
         std::bind(&WaypointEditorTool::handleLoadWaypoints, this, _1, _2)
@@ -66,6 +74,7 @@ void WaypointEditorTool::onInitialize()
     );
 
     waypoint_sequence_.clear();
+    pose_dirty_ = false;
 }
 
 void WaypointEditorTool::onPoseSet(double x, double y, double theta)
@@ -91,6 +100,8 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
     server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
     server_->applyChanges();
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
+    waypoint_sequence_.snapshotHistory();
+    pose_dirty_ = false;
 
     deactivate();
 }
@@ -239,9 +250,19 @@ void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualizati
             new_pose.orientation.z = fb->pose.orientation.z;
             new_pose.orientation.w = fb->pose.orientation.w;
             waypoint_sequence_.updatePose(id, new_pose);
+            pose_dirty_ = true;
 
             server_->setPose(fb->marker_name, fb->pose);
             server_->applyChanges();
+            break;
+        }
+
+        case visualization_msgs::msg::InteractiveMarkerFeedback::MOUSE_UP:
+        {
+            if (pose_dirty_) {
+                waypoint_sequence_.snapshotHistory();
+                pose_dirty_ = false;
+            }
             break;
         }
 
@@ -269,6 +290,8 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
         case 1:
             waypoint_sequence_.eraseWaypoint(static_cast<std::size_t>(id));
             updateWaypointMarker();
+            waypoint_sequence_.snapshotHistory();
+            pose_dirty_ = false;
             RCLCPP_INFO(nh_->get_logger(), "Deleted waypoint %d", id);
             break;
 
@@ -293,6 +316,8 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                     waypoint_sequence_.eraseWaypoint(static_cast<std::size_t>(id));
                     waypoint_sequence_.insertWaypoint(static_cast<std::size_t>(insert_id), std::move(waypoint));
                     updateWaypointMarker();
+                    waypoint_sequence_.snapshotHistory();
+                    pose_dirty_ = false;
                     RCLCPP_INFO(nh_->get_logger(), "Changed waypoint id %d to %d", id, insert_id);
                 } else {
                     const int max_index = std::max(0, static_cast<int>(waypoint_sequence_.size()) - 1);
@@ -327,6 +352,8 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
             if (ok) {
                 waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command = text.toStdString();
                 updateWaypointMarker();
+                waypoint_sequence_.snapshotHistory();
+                pose_dirty_ = false;
                 RCLCPP_INFO(nh_->get_logger(), "Updated command of waypoint %d to '%s'", id, waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command.c_str());
             }
         }
@@ -507,10 +534,40 @@ void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv
         wp.pose.header.stamp = nh_->now();
     }
     waypoint_sequence_.assign(std::move(loaded));
+    waypoint_sequence_.snapshotHistory();
+    pose_dirty_ = false;
     updateWaypointMarker();
 
     res->success = true;
     res->message = "Loaded " + std::to_string(waypoint_sequence_.size()) + " waypoints from " + path;
+}
+
+void WaypointEditorTool::handleUndoWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+{
+    if (!waypoint_sequence_.undo()) {
+        res->success = false;
+        res->message = "No more actions to undo";
+        return;
+    }
+    pose_dirty_ = false;
+    updateWaypointMarker();
+    publishRangeMetrics();
+    res->success = true;
+    res->message = "Undid waypoint change";
+}
+
+void WaypointEditorTool::handleRedoWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+{
+    if (!waypoint_sequence_.redo()) {
+        res->success = false;
+        res->message = "No more actions to redo";
+        return;
+    }
+    pose_dirty_ = false;
+    updateWaypointMarker();
+    publishRangeMetrics();
+    res->success = true;
+    res->message = "Redid waypoint change";
 }
 
 void WaypointEditorTool::activate() {}

@@ -106,6 +106,14 @@ WaypointEditorPanel::WaypointEditorPanel(QWidget *parent) : rviz_common::Panel(p
     load_2d_map_button_    = new QPushButton("Load Map", this);
     load_waypoints_button_ = new QPushButton("Load WPs", this);
     save_waypoints_button_ = new QPushButton("Save WPs", this);
+    undo_button_           = new QPushButton("Undo", this);
+    redo_button_           = new QPushButton("Redo", this);
+
+    QHBoxLayout *history_button_layout = new QHBoxLayout;
+    history_button_layout->setContentsMargins(0, 0, 0, 0);
+    history_button_layout->setSpacing(8);
+    history_button_layout->addWidget(undo_button_);
+    history_button_layout->addWidget(redo_button_);
 
     QHBoxLayout *button_layout = new QHBoxLayout;
     button_layout->setContentsMargins(0, 0, 0, 0);
@@ -121,6 +129,8 @@ WaypointEditorPanel::WaypointEditorPanel(QWidget *parent) : rviz_common::Panel(p
 
     layout_->addLayout(top_layout);
     layout_->addSpacing(8);
+    layout_->addLayout(history_button_layout);
+    layout_->addSpacing(4);
     layout_->addLayout(button_layout);
     layout_->addStretch();
 
@@ -130,6 +140,8 @@ WaypointEditorPanel::WaypointEditorPanel(QWidget *parent) : rviz_common::Panel(p
     connect(load_2d_map_button_, &QPushButton::clicked, this, &WaypointEditorPanel::onLoadMapButtonClick);
     connect(load_waypoints_button_, &QPushButton::clicked, this, &WaypointEditorPanel::onLoadWaypointsButtonClick);
     connect(save_waypoints_button_, &QPushButton::clicked, this, &WaypointEditorPanel::onSaveWaypointsButtonClick);
+    connect(undo_button_, &QPushButton::clicked, this, &WaypointEditorPanel::onUndoWaypointsButtonClick);
+    connect(redo_button_, &QPushButton::clicked, this, &WaypointEditorPanel::onRedoWaypointsButtonClick);
 }
 
 WaypointEditorPanel::~WaypointEditorPanel() {}
@@ -140,6 +152,8 @@ void WaypointEditorPanel::onInitialize()
     load_map_client_  = nh_->create_client<nav2_msgs::srv::LoadMap>("map_server/load_map");
     load_client_      = nh_->create_client<std_srvs::srv::Trigger>("load_waypoints");
     save_client_      = nh_->create_client<std_srvs::srv::Trigger>("save_waypoints");
+    undo_client_      = nh_->create_client<std_srvs::srv::Trigger>("undo_waypoints");
+    redo_client_      = nh_->create_client<std_srvs::srv::Trigger>("redo_waypoints");
 
     last_wp_dist_sub_ = nh_->create_subscription<std_msgs::msg::Float64>(
         "last_wp_dist", 10,
@@ -253,6 +267,44 @@ void WaypointEditorPanel::onSaveWaypointsButtonClick()
                 ok = false;
             }
             QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, ok ? tr("Saved WPs") : tr("Failed to save WPs")));
+        });
+}
+
+void WaypointEditorPanel::onUndoWaypointsButtonClick()
+{
+    if (!undo_client_->wait_for_service(std::chrono::seconds(1))) {
+        return;
+    }
+    auto req = std::make_shared<std_srvs::srv::Trigger::Request>();
+    undo_client_->async_send_request(req,
+        [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future) {
+            bool ok = false;
+            try {
+                auto response = future.get();
+                ok = response->success;
+            } catch (...) {
+                ok = false;
+            }
+            QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, ok ? tr("Reverted change") : tr("Nothing to undo")));
+        });
+}
+
+void WaypointEditorPanel::onRedoWaypointsButtonClick()
+{
+    if (!redo_client_->wait_for_service(std::chrono::seconds(1))) {
+        return;
+    }
+    auto req = std::make_shared<std_srvs::srv::Trigger::Request>();
+    redo_client_->async_send_request(req,
+        [this](rclcpp::Client<std_srvs::srv::Trigger>::SharedFuture future) {
+            bool ok = false;
+            try {
+                auto response = future.get();
+                ok = response->success;
+            } catch (...) {
+                ok = false;
+            }
+            QMetaObject::invokeMethod(status_value_label_, "setText", Qt::QueuedConnection, Q_ARG(QString, ok ? tr("Reapplied change") : tr("Nothing to redo")));
         });
 }
 

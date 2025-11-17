@@ -54,6 +54,7 @@ void WaypointSequence::clear()
     waypoints_.clear();
     total_distance_ = kZeroDistance;
     last_segment_distance_ = kZeroDistance;
+    resetHistory();
 }
 
 Waypoint &WaypointSequence::at(std::size_t index)
@@ -73,6 +74,48 @@ void WaypointSequence::updatePose(std::size_t index, const geometry_msgs::msg::P
     }
     waypoints_[index].pose.pose = pose;
     recalcDistances();
+}
+
+void WaypointSequence::resetHistory()
+{
+    history_.clear();
+    history_.push_back(waypoints_);
+    history_index_ = history_.empty() ? 0 : history_.size() - 1;
+}
+
+void WaypointSequence::snapshotHistory()
+{
+    if (history_.empty()) {
+        resetHistory();
+        return;
+    }
+    if (history_index_ + 1 < history_.size()) {
+        history_.resize(history_index_ + 1);
+    }
+    history_.push_back(waypoints_);
+    history_index_ = history_.size() - 1;
+}
+
+bool WaypointSequence::undo()
+{
+    if (history_.empty() || history_index_ == 0) {
+        return false;
+    }
+    history_index_ -= 1;
+    waypoints_ = history_[history_index_];
+    recalcDistances();
+    return true;
+}
+
+bool WaypointSequence::redo()
+{
+    if (history_.empty() || history_index_ + 1 >= history_.size()) {
+        return false;
+    }
+    history_index_ += 1;
+    waypoints_ = history_[history_index_];
+    recalcDistances();
+    return true;
 }
 
 double WaypointSequence::computeSegment(std::size_t first_index) const

@@ -18,11 +18,12 @@ find_package(std_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
 set(panel_headers
-  include/waypoint_editor/waypoint_editor_panel.hpp
+  include/waypoint_editor/rviz/waypoint_editor_panel.hpp
 )
 qt5_wrap_cpp(waypoint_editor_moc ${panel_headers})
 
@@ -32,8 +33,11 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 add_library(${PROJECT_NAME} SHARED
-  src/waypoint_editor_tool.cpp
-  src/waypoint_editor_panel.cpp
+  src/core/waypoint_sequence.cpp
+  src/io/waypoint_csv.cpp
+  src/io/waypoint_yaml.cpp
+  src/rviz/waypoint_editor_tool.cpp
+  src/rviz/waypoint_editor_panel.cpp
   ${waypoint_editor_moc}
 )
 
@@ -45,6 +49,7 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   Qt5::Widgets
+  yaml-cpp
 )
 
 ament_target_dependencies(${PROJECT_NAME}
@@ -101,6 +106,7 @@ ament_export_dependencies(
   std_srvs
   std_msgs
   nav2_msgs
+  yaml-cpp
 )
 
 ament_package()

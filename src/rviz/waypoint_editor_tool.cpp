@@ -15,18 +15,15 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QFile>
-#include <QTextStream>
-#include <QStringList>
-
-#include <vector>
-#include <string>
-#include <cmath>
-#include <fstream>
-#include <sstream>
+#include <QString>
 #include <algorithm>
+#include <chrono>
+#include <string>
+#include <vector>
 
-#include "waypoint_editor/waypoint_editor_tool.hpp"
+#include "waypoint_editor/io/waypoint_csv.hpp"
+#include "waypoint_editor/io/waypoint_yaml.hpp"
+#include "waypoint_editor/rviz/waypoint_editor_tool.hpp"
 
 using namespace std::placeholders;
 
@@ -64,13 +61,11 @@ void WaypointEditorTool::onInitialize()
     line_timer_ = nh_->create_wall_timer(
         std::chrono::milliseconds(500),
         [this]() {
-            publishLineMarker();
-            publishTotalWpsDist();
-            publishLastWpsDist();
+            publishRangeMetrics();
         }
     );
 
-    waypoints_.clear();
+    waypoint_sequence_.clear();
 }
 
 void WaypointEditorTool::onPoseSet(double x, double y, double theta)
@@ -91,22 +86,11 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
 
     wp.function_command.clear();
 
-    waypoints_.push_back(std::move(wp));
-    
-    int new_id = static_cast<int>(waypoints_.size() - 1);
+    const int new_id = waypoint_sequence_.appendWaypoint(std::move(wp));
     auto int_marker = createWaypointMarker(new_id);
     server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
     server_->applyChanges();
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
-    
-    if (waypoints_.size() >= 2) {
-        const auto &p0 = waypoints_[waypoints_.size()-2].pose.pose.position;
-        const auto &p1 = waypoints_.back().pose.pose.position;
-        double dx = p1.x - p0.x;
-        double dy = p1.y - p0.y;
-        last_wp_dist_ = std::hypot(dx, dy);
-        total_wp_dist_ += last_wp_dist_;
-    }
 
     deactivate();
 }
@@ -114,7 +98,7 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
 void WaypointEditorTool::updateWaypointMarker()
 {
     server_->clear();
-    for (size_t i = 0; i < waypoints_.size(); ++i) {
+    for (size_t i = 0; i < waypoint_sequence_.size(); ++i) {
         auto int_marker = createWaypointMarker(static_cast<int>(i));
         server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
     }
@@ -124,12 +108,12 @@ void WaypointEditorTool::updateWaypointMarker()
 
 visualization_msgs::msg::InteractiveMarker WaypointEditorTool::createWaypointMarker(const int id)
 {
-    const auto & wp = waypoints_[id];
+    const auto & wp = waypoint_sequence_.at(id);
 
     visualization_msgs::msg::InteractiveMarker int_marker;
-    int_marker.header.frame_id = wp.pose.header.frame_id;;
+    int_marker.header.frame_id = wp.pose.header.frame_id;
     int_marker.name = std::to_string(id);
-    int_marker.description = waypoints_.at(id).function_command;
+    int_marker.description = waypoint_sequence_.at(id).function_command;
     int_marker.scale = 1.0;
     int_marker.pose.position = wp.pose.pose.position;
     int_marker.pose.orientation.x = 0.0;
@@ -205,7 +189,7 @@ visualization_msgs::msg::InteractiveMarker WaypointEditorTool::createWaypointMar
         text.color.g = 0.0;
         text.color.b = 0.0;
         text.color.a = 1.0;
-        std::string id_text = "ID:" + std::to_string(id) + "\n" + waypoints_.at(id).function_command;;
+        std::string id_text = "ID:" + std::to_string(id) + "\n" + waypoint_sequence_.at(id).function_command;
         text.text = id_text;
         text.pose.position.x = -0.3;
         text.pose.position.y = -0.3;
@@ -249,39 +233,15 @@ void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualizati
     {
         case visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE:
         {
-            waypoints_[id].pose.pose.position     = fb->pose.position;
-            waypoints_[id].pose.pose.orientation.x = 0.0;
-            waypoints_[id].pose.pose.orientation.y = 0.0;
-            waypoints_[id].pose.pose.orientation.z = fb->pose.orientation.z;
-            waypoints_[id].pose.pose.orientation.w = fb->pose.orientation.w;
+            geometry_msgs::msg::Pose new_pose = fb->pose;
+            new_pose.orientation.x = 0.0;
+            new_pose.orientation.y = 0.0;
+            new_pose.orientation.z = fb->pose.orientation.z;
+            new_pose.orientation.w = fb->pose.orientation.w;
+            waypoint_sequence_.updatePose(id, new_pose);
 
             server_->setPose(fb->marker_name, fb->pose);
             server_->applyChanges();
-
-            {
-                double new_total = 0.0;
-                for (size_t i = 1; i < waypoints_.size(); ++i) {
-                    const auto &a = waypoints_[i-1].pose.pose.position;
-                    const auto &b = waypoints_[i].pose.pose.position;
-                    new_total += std::hypot(b.x - a.x, b.y - a.y);
-                }
-                total_wp_dist_ = new_total;
-            }
-
-            {
-                double segment = 0.0;
-                if (id > 0) {
-                    const auto &p0 = waypoints_[id-1].pose.pose.position;
-                    const auto &p1 = waypoints_[id].pose.pose.position;
-                    segment = std::hypot(p1.x - p0.x, p1.y - p0.y);
-                }
-                else if (id + 1 < static_cast<int>(waypoints_.size())) {
-                    const auto &p0 = waypoints_[id].pose.pose.position;
-                    const auto &p1 = waypoints_[id+1].pose.pose.position;
-                    segment = std::hypot(p1.x - p0.x, p1.y - p0.y);
-                }
-                last_wp_dist_ = segment;
-            }
             break;
         }
 
@@ -301,13 +261,13 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
     if (fb->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::MENU_SELECT) { return; }
 
     int id = std::stoi(fb->marker_name);
-    if (id < 0 || id >= static_cast<int>(waypoints_.size())) { return; }
+    if (id < 0 || id >= static_cast<int>(waypoint_sequence_.size())) { return; }
 
     switch (fb->menu_entry_id) {
       
         // Delete Waypoint
         case 1:
-            waypoints_.erase(waypoints_.begin() + id);
+            waypoint_sequence_.eraseWaypoint(static_cast<std::size_t>(id));
             updateWaypointMarker();
             RCLCPP_INFO(nh_->get_logger(), "Deleted waypoint %d", id);
             break;
@@ -328,13 +288,14 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
 
             if (ok) {
                 int insert_id = text.toInt();
-                if (0 <= insert_id && insert_id < static_cast<int>(waypoints_.size())) {
-                    auto tmp_wp = waypoints_[id];
-                    waypoints_.erase(waypoints_.begin() + id);
-                    waypoints_.insert(waypoints_.begin() + insert_id, tmp_wp);
+                if (0 <= insert_id && insert_id < static_cast<int>(waypoint_sequence_.size())) {
+                    Waypoint waypoint = waypoint_sequence_.at(static_cast<std::size_t>(id));
+                    waypoint_sequence_.eraseWaypoint(static_cast<std::size_t>(id));
+                    waypoint_sequence_.insertWaypoint(static_cast<std::size_t>(insert_id), std::move(waypoint));
                     updateWaypointMarker();
                     RCLCPP_INFO(nh_->get_logger(), "Changed waypoint id %d to %d", id, insert_id);
                 } else {
+                    const int max_index = std::max(0, static_cast<int>(waypoint_sequence_.size()) - 1);
                     QMessageBox::warning(
                         nullptr,
                         tr("Invalid Waypoint ID"),
@@ -342,7 +303,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                         "Please enter a value between %2 and %3.")
                         .arg(insert_id)
                         .arg(0)
-                        .arg(static_cast<int>(waypoints_.size() - 1))
+                        .arg(max_index)
                     );
                 }
             }
@@ -353,7 +314,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
         case 3:
         {
             bool ok = false;
-            QString current = QString::fromStdString(waypoints_[id].function_command);
+            QString current = QString::fromStdString(waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command);
             QString text = QInputDialog::getText(
                 nullptr,
                 tr("Edit Function Command"),
@@ -364,9 +325,9 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
             );
 
             if (ok) {
-                waypoints_[id].function_command = text.toStdString();
+                waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command = text.toStdString();
                 updateWaypointMarker();
-                RCLCPP_INFO(nh_->get_logger(), "Updated command of waypoint %d to '%s'", id, waypoints_[id].function_command.c_str());
+                RCLCPP_INFO(nh_->get_logger(), "Updated command of waypoint %d to '%s'", id, waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command.c_str());
             }
         }
             break;
@@ -391,172 +352,165 @@ void WaypointEditorTool::publishLineMarker()
     line.color.b  = 0.0f;
     line.color.a  = 1.0f;
 
-    for (size_t i = 1; i < waypoints_.size(); ++i) {
-        geometry_msgs::msg::Point p0 = waypoints_[i-1].pose.pose.position;
-        geometry_msgs::msg::Point p1 = waypoints_[i].pose.pose.position;
+    const auto &waypoints = waypoint_sequence_.waypoints();
+    for (size_t i = 1; i < waypoints.size(); ++i) {
+        geometry_msgs::msg::Point p0 = waypoints[i-1].pose.pose.position;
+        geometry_msgs::msg::Point p1 = waypoints[i].pose.pose.position;
         line.points.push_back(p0);
         line.points.push_back(p1);
     }
-
     line_pub_->publish(line);
 }
 
 void WaypointEditorTool::publishTotalWpsDist()
 {
     std_msgs::msg::Float64 msg;
-    msg.data = total_wp_dist_;
+    msg.data = waypoint_sequence_.totalDistance();
     total_wp_dist_pub_->publish(msg);
 }
 
 void WaypointEditorTool::publishLastWpsDist()
 {
     std_msgs::msg::Float64 msg;
-    msg.data = last_wp_dist_;
+    msg.data = waypoint_sequence_.lastSegmentDistance();
     last_wp_dist_pub_->publish(msg);
+}
+
+void WaypointEditorTool::publishRangeMetrics()
+{
+    publishLineMarker();
+    publishTotalWpsDist();
+    publishLastWpsDist();
+}
+
+bool WaypointEditorTool::requestFilePathForSaving(std::string &path, bool &save_as_yaml)
+{
+    QString selected_filter;
+    QString qpath = QFileDialog::getSaveFileName(
+        nullptr,
+        tr("Save Waypoints As"),
+        "",
+        tr("CSV Files (*.csv);;YAML Files (*.yaml)"),
+        &selected_filter
+    );
+
+    if (qpath.isEmpty()) {
+        return false;
+    }
+
+    auto lower = qpath.toLower();
+    if (lower.endsWith(".yaml")) {
+        save_as_yaml = true;
+    } else if (lower.endsWith(".csv")) {
+        save_as_yaml = false;
+    } else {
+        // Fallback to selected filter when no extension given.
+        if (selected_filter.contains("yaml", Qt::CaseInsensitive)) {
+            qpath += ".yaml";
+            save_as_yaml = true;
+        } else {
+            qpath += ".csv";
+            save_as_yaml = false;
+        }
+    }
+
+    path = qpath.toStdString();
+    return true;
+}
+
+bool WaypointEditorTool::requestFilePathForLoading(std::string &path, bool &load_yaml)
+{
+    QString selected_filter;
+    QString qpath = QFileDialog::getOpenFileName(
+        nullptr,
+        tr("Open Waypoints"),
+        "",
+        tr("CSV Files (*.csv);;YAML Files (*.yaml)"),
+        &selected_filter
+    );
+    if (qpath.isEmpty()) {
+        return false;
+    }
+
+    auto lower = qpath.toLower();
+    if (lower.endsWith(".yaml")) {
+        load_yaml = true;
+    } else if (lower.endsWith(".csv")) {
+        load_yaml = false;
+    } else {
+        load_yaml = selected_filter.contains("yaml", Qt::CaseInsensitive);
+    }
+
+    path = qpath.toStdString();
+    return true;
 }
 
 void WaypointEditorTool::handleSaveWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
 {
-    QString qpath = QFileDialog::getSaveFileName(nullptr, tr("Save Waypoints As"), "", tr("CSV Files (*.csv)"));
-
-    if (qpath.isEmpty()) {
+    std::string path;
+    bool save_as_yaml = false;
+    if (!requestFilePathForSaving(path, save_as_yaml)) {
         res->success = false;
         res->message = "Save canceled by user";
         return;
     }
 
-    if (!qpath.endsWith(".csv", Qt::CaseInsensitive)) {
-        qpath += ".csv";
+    std::string error;
+    bool ok = false;
+    if (save_as_yaml) {
+        ok = io::WaypointYaml::Save(waypoint_sequence_.waypoints(), path, error);
+    } else {
+        ok = io::WaypointCsv::Save(waypoint_sequence_.waypoints(), path, error);
     }
-    const std::string path = qpath.toStdString();
 
-    std::ofstream ofs(path);
-    if (!ofs) {
-        QMessageBox::warning(nullptr, tr("Error"), tr("Cannot open file:\n%1").arg(qpath));
+    if (!ok) {
+        QMessageBox::warning(nullptr, tr("Error"), tr("Cannot open file:\n%1").arg(QString::fromStdString(path)));
         res->success = false;
-        res->message = "Failed to open file: " + path;
+        res->message = error;
         return;
     }
 
-    std::vector<std::vector<std::string>> all_cmds;
-    all_cmds.reserve(waypoints_.size());
-    size_t max_cmds = 0;
-    for (const auto & wp : waypoints_) {
-        std::vector<std::string> parts;
-        std::istringstream ss(wp.function_command);
-        std::string token;
-        while (std::getline(ss, token, ',')) {
-            parts.push_back(token);
-        }
-        max_cmds = std::max(max_cmds, parts.size());
-        all_cmds.push_back(std::move(parts));
-    }
-
-    ofs << "id,pose_x,pose_y,pose_z,rot_x,rot_y,rot_z,rot_w,command";
-    for (size_t j = 1; j < max_cmds; ++j) {
-        ofs << ",";
-    }
-    ofs << ",\n";
-
-    for (size_t i = 0; i < waypoints_.size(); ++i) {
-        const auto & p = waypoints_[i].pose.pose;
-        ofs
-          << i << ","
-          << p.position.x << "," << p.position.y << "," << p.position.z << ","
-          << p.orientation.x << "," << p.orientation.y << ","
-          << p.orientation.z << "," << p.orientation.w;
-
-        const auto & parts = all_cmds[i];
-        for (size_t j = 0; j < max_cmds; ++j) {
-            ofs << ",";
-            if (j < parts.size()) {
-                ofs << parts[j];
-            }
-        }
-        ofs << ",\n";
-    }
-
-    ofs.close();
     res->success = true;
-    res->message = "Saved " + std::to_string(waypoints_.size()) + " waypoints to " + path;
-    return;
+    res->message = "Saved " + std::to_string(waypoint_sequence_.size()) + " waypoints to " + path;
 }
 
 void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
 {
-    QString qpath = QFileDialog::getOpenFileName(nullptr, tr("Open Waypoints"), "", tr("CSV Files (*.csv)"));
-    if (qpath.isEmpty()) {
+    std::string path;
+    bool load_yaml = false;
+    if (!requestFilePathForLoading(path, load_yaml)) {
         res->success = false;
         res->message = "Load canceled by user";
         return;
     }
 
-    QFile file(qpath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(nullptr, tr("Error"), tr("Cannot open file:\n%1").arg(qpath));
+    std::vector<Waypoint> loaded;
+    std::string error;
+    bool ok = false;
+    if (load_yaml) {
+        ok = io::WaypointYaml::Load(path, loaded, error);
+    } else {
+        ok = io::WaypointCsv::Load(path, loaded, error);
+    }
+
+    if (!ok) {
+        QMessageBox::warning(nullptr, tr("Error"), tr("Cannot open file:\n%1").arg(QString::fromStdString(path)));
         res->success = false;
-        res->message = "Failed to open file: " + qpath.toStdString();
+        res->message = error;
         return;
     }
 
-    QTextStream in(&file);
-    QString header = in.readLine();
-
-    waypoints_.clear();
-
-    while (!in.atEnd()) {
-        QString line = in.readLine().trimmed();
-        if (line.isEmpty()) continue;
-
-        QStringList cols = line.split(',');
-        if (cols.size() < 9) continue;
-
-        Waypoint wp;
-        wp.pose.header.frame_id = "map";
+    for (auto &wp : loaded) {
+        if (wp.pose.header.frame_id.empty()) {
+            wp.pose.header.frame_id = "map";
+        }
         wp.pose.header.stamp = nh_->now();
-        bool ok = false;
-        wp.pose.pose.position.x    = cols[1].toDouble(&ok);  if (!ok) continue;
-        wp.pose.pose.position.y    = cols[2].toDouble(&ok);  if (!ok) continue;
-        wp.pose.pose.position.z    = cols[3].toDouble(&ok);  if (!ok) continue;
-        wp.pose.pose.orientation.x = cols[4].toDouble(&ok);  if (!ok) continue;
-        wp.pose.pose.orientation.y = cols[5].toDouble(&ok);  if (!ok) continue;
-        wp.pose.pose.orientation.z = cols[6].toDouble(&ok);  if (!ok) continue;
-        wp.pose.pose.orientation.w = cols[7].toDouble(&ok);  if (!ok) continue;
-
-        QStringList cmdParts = cols.mid(8);
-        for (int i = cmdParts.size() - 1; i >= 0; --i) {
-            if (cmdParts[i].trimmed().isEmpty()) {
-                cmdParts.removeAt(i);
-            }
-        }
-
-        QString cmd = cmdParts.join(',');
-        if (cmd.startsWith('"') && cmd.endsWith('"') && cmd.size() >= 2) {
-            cmd = cmd.mid(1, cmd.size() - 2);
-        }
-        wp.function_command = cmd.toStdString();
-        waypoints_.push_back(std::move(wp));
     }
-    file.close();
-
-    total_wp_dist_ = 0.0;
-    last_wp_dist_  = 0.0;
-    const size_t n = waypoints_.size();
-    if (n >= 2) {
-        for (size_t i = 1; i < n; ++i) {
-            const auto &a = waypoints_[i-1].pose.pose.position;
-            const auto &b = waypoints_[i].pose.pose.position;
-            total_wp_dist_ += std::hypot(b.x - a.x, b.y - a.y);
-        }
-        const auto &p0 = waypoints_[n-2].pose.pose.position;
-        const auto &p1 = waypoints_[n-1].pose.pose.position;
-        last_wp_dist_ = std::hypot(p1.x - p0.x, p1.y - p0.y);
-    }
-
+    waypoint_sequence_.assign(std::move(loaded));
     updateWaypointMarker();
 
     res->success = true;
-    res->message = "Loaded " + std::to_string(waypoints_.size()) + " waypoints from " + qpath.toStdString();
+    res->message = "Loaded " + std::to_string(waypoint_sequence_.size()) + " waypoints from " + path;
 }
 
 void WaypointEditorTool::activate() {}

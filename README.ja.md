@@ -18,7 +18,7 @@
 
 ## 概要
 このパッケージは、ナビゲーションで使用するウェイポイント（Waypoint）を、2次元地図を見ながら直感的に編集・保存できるツールです。  
-編集したウェイポイントは **CSV形式**で保存が可能です。
+編集したウェイポイントは **CSV形式** や Nav2 互換の **YAML形式** で保存できます。
 
 
 ## 開発環境
@@ -67,13 +67,14 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 
 
 ### 4. ウェイポイントの保存  
-- RViz2 画面右下のパネルで "**Save WPs**" を選択し、保存したいファイル名を入力することで、編集内容を **CSV形式**で保存できます。
+- RViz2 画面右下のパネルで "**Save WPs**" を選択し、ダイアログから **CSV** または **YAML** を選べます。  
+- Nav2 で利用したい場合は **YAML** を選択してください。
 
 ![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
 
 
 ### 5. ウェイポイントの読み込み  
-- "**Load WPs**" ボタンから、過去に保存した `.csv` ファイルを読み込み、ウェイポイントの再編集が可能です。
+- "**Load WPs**" ボタンから、保存しておいた `.csv` または `.yaml` ファイルを読み込み、ウェイポイントの再編集が可能です。
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)
 

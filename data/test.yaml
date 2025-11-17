@@ -1,0 +1,236 @@
+waypoints:
+  - id: 0
+    frame_id: map
+    pose:
+      position:
+        x: -4.931
+        y: 3.41178
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.390991
+        w: 0.920394
+    command: "skip:2,wait:2"
+  - id: 1
+    frame_id: map
+    pose:
+      position:
+        x: -0.202694
+        y: 1.53702
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.428373
+        w: 0.903602
+  - id: 2
+    frame_id: map
+    pose:
+      position:
+        x: 3.34777
+        y: -3.18996
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.384145
+        w: 0.923273
+    command: "wait"
+  - id: 3
+    frame_id: map
+    pose:
+      position:
+        x: 8.58121
+        y: -8.07095
+        z: 0
+      orientation:
+        x: 2.89685e-08
+        y: 7.12346e-09
+        z: 0.0399339
+        w: 0.999202
+  - id: 4
+    frame_id: map
+    pose:
+      position:
+        x: 12.5222
+        y: -4.10642
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.357528
+        w: 0.933902
+  - id: 5
+    frame_id: map
+    pose:
+      position:
+        x: 18.4855
+        y: 1.67427
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.366778
+        w: 0.930309
+  - id: 6
+    frame_id: map
+    pose:
+      position:
+        x: 23.7009
+        y: 6.74983
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.353245
+        w: 0.935531
+  - id: 7
+    frame_id: map
+    pose:
+      position:
+        x: 27.9206
+        y: 11.6362
+        z: 0
+      orientation:
+        x: 1.25141e-08
+        y: 4.03569e-08
+        z: 0.793257
+        w: 0.608886
+  - id: 8
+    frame_id: map
+    pose:
+      position:
+        x: 20.0633
+        y: 14.9148
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.987698
+        w: 0.156371
+  - id: 9
+    frame_id: map
+    pose:
+      position:
+        x: 10.8859
+        y: 17.6426
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.990173
+        w: 0.139849
+  - id: 10
+    frame_id: map
+    pose:
+      position:
+        x: 2.13388
+        y: 20.3211
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.993024
+        w: 0.117909
+    command: "konnnichiha"
+  - id: 11
+    frame_id: map
+    pose:
+      position:
+        x: -6.55316
+        y: 22.9295
+        z: -3.05176e-05
+      orientation:
+        x: 0
+        y: 0
+        z: 0.991034
+        w: 0.133612
+    command: "gadsagesふ"
+  - id: 12
+    frame_id: map
+    pose:
+      position:
+        x: -15.0451
+        y: 24.8557
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.994209
+        w: 0.107462
+  - id: 13
+    frame_id: map
+    pose:
+      position:
+        x: -22.008
+        y: 26.6825
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: 0.989488
+        w: 0.144615
+    command: "key"
+  - id: 14
+    frame_id: map
+    pose:
+      position:
+        x: -28.9081
+        y: 28.5153
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.566267
+        w: 0.824222
+    command: "stop:3,end"
+  - id: 15
+    frame_id: map
+    pose:
+      position:
+        x: -28.7988
+        y: 25.323
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.513186
+        w: 0.858278
+  - id: 16
+    frame_id: map
+    pose:
+      position:
+        x: -21.8313
+        y: 17.7086
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.415461
+        w: 0.909611
+  - id: 17
+    frame_id: map
+    pose:
+      position:
+        x: -14.5618
+        y: 10.1459
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.345581
+        w: 0.938389
+    command: "fddfsfd"
+  - id: 18
+    frame_id: map
+    pose:
+      position:
+        x: -7.66195
+        y: 5.55622
+        z: 0
+      orientation:
+        x: 0
+        y: 0
+        z: -0.400003
+        w: 0.916514

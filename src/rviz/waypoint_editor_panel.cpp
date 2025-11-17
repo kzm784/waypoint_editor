@@ -19,7 +19,7 @@
 #include <QFontMetrics>
 #include <QSizePolicy>
 
-#include "waypoint_editor/waypoint_editor_panel.hpp"
+#include "waypoint_editor/rviz/waypoint_editor_panel.hpp"
 
 namespace waypoint_editor
 {

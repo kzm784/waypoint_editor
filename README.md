@@ -17,7 +17,7 @@
 
 ## Overview
 This package provides a tool for intuitively editing and saving waypoints used in robot navigation while referencing a 2D map.  
-The edited waypoints can be saved in **CSV format**.
+The edited waypoints can be saved in **CSV** or **Nav2-compatible YAML** format.
 
 
 ## Development Environment
@@ -66,14 +66,14 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 
 
 ### 4. Saving Waypoints  
-- Click "**Save WPs**" button in the bottom-right panel of RViz2.  
-- Enter a file name to save the edited waypoints in **CSV format**.
+- Click "**Save WPs**" in the bottom-right panel of RViz2 and pick either **CSV** or **YAML** in the dialog.  
+- Select **YAML** when you need a Nav2-compatible file for waypoint follower demos.
 
 ![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
 
 
 ### 5. Loading Waypoints  
-- Click "**Load WPs**" button in the bottom-right panel of RViz2 and select the previously saved `.csv` file.  
+- Click "**Load WPs**" button in the bottom-right panel of RViz2 and select the previously saved `.csv` or `.yaml` file.  
 - The waypoints can then be edited again in the same interface.
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)

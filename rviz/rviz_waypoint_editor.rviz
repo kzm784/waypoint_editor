@@ -24,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
   - Class: waypoint_editor/WaypointEditorPanel
     Name: WaypointEditorPanel
 Visualization Manager:
@@ -69,33 +69,11 @@ Visualization Manager:
         Value: /map_updates
       Use Timestamp: false
       Value: true
-    - Class: rviz_default_plugins/InteractiveMarkers
-      Enable Transparency: true
-      Enabled: true
-      Interactive Markers Namespace: /interactive_marker_server
-      Name: InteractiveMarkers
-      Show Axes: false
-      Show Descriptions: false
-      Show Visual Aids: false
-      Value: true
-    - Class: rviz_default_plugins/Marker
-      Enabled: true
-      Name: Marker
-      Namespaces:
-        waypoint_lines: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /waypoint_line
-      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 55.88180160522461
-        Min Value: -4.461480617523193
+        Max Value: 18.771371841430664
+        Min Value: -1.3044190406799316
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -124,6 +102,131 @@ Visualization Manager:
         Value: /map_cloud
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Class: rviz_default_plugins/InteractiveMarkers
+      Enable Transparency: true
+      Enabled: true
+      Interactive Markers Namespace: /interactive_marker_server
+      Name: InteractiveMarkers
+      Show Axes: false
+      Show Descriptions: false
+      Show Visual Aids: false
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /waypoint_line
+      Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_camera_optical_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        front_lrf_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base_footprint:
+          Value: true
+        base_link:
+          Value: true
+        front_camera_link:
+          Value: true
+        front_camera_optical_link:
+          Value: true
+        front_lrf_link:
+          Value: true
+        left_wheel_link:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
+        right_wheel_link:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                front_camera_link:
+                  front_camera_optical_link:
+                    {}
+                front_lrf_link:
+                  {}
+                left_wheel_link:
+                  {}
+                right_wheel_link:
+                  {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
@@ -171,26 +274,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz_default_plugins/Orbit
-      Distance: 355.7950439453125
+      Angle: -1.56999933719635
+      Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 70.04913330078125
-        Y: -45.04374313354492
-        Z: -71.60728454589844
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Scale: 86.25347137451172
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz_default_plugins)
-      Yaw: 4.712383270263672
+      Value: TopDownOrtho (rviz_default_plugins)
+      X: 0.20158174633979797
+      Y: 1.4944989681243896
     Saved: ~
 Window Geometry:
   Displays:
@@ -198,7 +296,7 @@ Window Geometry:
   Height: 1066
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000003000000000000015600000391fc0200000002fb000000100044006900730070006c006100790073010000003d00000391000000c900fffffffb0000001200530065006c0065006300740069006f006e00000002b10000011d0000005c00ffffff000000010000014300000391fc0200000003fb0000000a00560069006500770073010000003d00000196000000a400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007301000001d90000012c0000005c00fffffffb000000260057006100790070006f0069006e00740045006400690074006f007200500061006e0065006c010000030b000000c3000000c300ffffff000000030000078000000039fc0100000001fb0000000800540069006d0065010000000000000780000002fb00ffffff000004db0000039100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000003000000000000015600000391fc0200000002fb000000100044006900730070006c006100790073010000003d00000391000000c900fffffffb0000001200530065006c0065006300740069006f006e00000002b10000011d0000005c00ffffff00000001000001c500000391fc0200000003fb0000000a00560069006500770073010000003d00000102000000a400fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000145000000c00000005c00fffffffb000000260057006100790070006f0069006e00740045006400690074006f007200500061006e0065006c010000020b000001c3000001bb00ffffff000000030000078000000039fc0100000001fb0000000800540069006d0065010000000000000780000002fb00ffffff000004590000039100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

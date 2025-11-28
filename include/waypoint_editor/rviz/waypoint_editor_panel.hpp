@@ -8,6 +8,9 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QDoubleSpinBox>
+#include <QLineEdit>
+#include <QComboBox>
 
 #include <std_srvs/srv/trigger.hpp>
 #include <std_msgs/msg/float64.hpp>
@@ -30,13 +33,19 @@ public:
     void save(rviz_common::Config config) const override;
 
 protected Q_SLOTS:
-    void onLoadMapButtonClick();
+    void onLoad2DMapButtonClick();
+    void onLoad3DMapButtonClick();
     void onLoadWaypointsButtonClick();
     void onSaveWaypointsButtonClick();
     void onUndoWaypointsButtonClick();
     void onRedoWaypointsButtonClick();
+    void onClearWaypointsButtonClick();
+    void onAutoToggle(bool checked);
 
 private:
+    void setAutoControlsEnabled(bool enabled);
+    void postStatusMessage(const QString &msg);
+
     QLabel *status_text_label_;
     QLabel *status_value_label_;
     QLabel *last_wp_dist_text_label_;
@@ -47,10 +56,16 @@ private:
     QHBoxLayout *logo_layout_;
     QHBoxLayout *button_layout_;
     QPushButton *load_2d_map_button_;
+    QPushButton *load_3d_map_button_;
     QPushButton *load_waypoints_button_;
     QPushButton *save_waypoints_button_;
     QPushButton *undo_button_;
     QPushButton *redo_button_;
+    QPushButton *clear_button_;
+    QPushButton *auto_toggle_button_;
+    QDoubleSpinBox *auto_distance_spin_;
+    QLineEdit *auto_topic_edit_;
+    QComboBox *auto_type_combo_;
 
     rclcpp::Node::SharedPtr nh_;
     rclcpp::Client<nav2_msgs::srv::LoadMap>::SharedPtr load_map_client_;
@@ -58,6 +73,10 @@ private:
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr save_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr undo_client_;
     rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr redo_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr clear_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr auto_start_client_;
+    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr auto_stop_client_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr auto_distance_pub_;
     rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr last_wp_dist_sub_;
     rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr total_wp_dist_sub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_pub_;

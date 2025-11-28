@@ -21,6 +21,10 @@
 #include <string>
 #include <vector>
 
+#include <tf2/exceptions.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_listener.h>
+
 #include "waypoint_editor/io/waypoint_csv.hpp"
 #include "waypoint_editor/io/waypoint_yaml.hpp"
 #include "waypoint_editor/rviz/waypoint_editor_tool.hpp"
@@ -40,6 +44,37 @@ void WaypointEditorTool::onInitialize()
     setName("Add Waypoint");
 
     nh_ = context_->getRosNodeAbstraction().lock()->get_raw_node();
+    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(nh_->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+    auto_pose_topic_ = nh_->declare_parameter<std::string>("auto_pose_topic", "amcl_pose");
+    auto_pose_type_  = nh_->declare_parameter<std::string>("auto_pose_type", "geometry_msgs/msg/PoseWithCovarianceStamped");
+    auto_min_distance_m_ = nh_->declare_parameter<double>("auto_min_distance", 1.0);
+    param_cb_handle_ = nh_->add_on_set_parameters_callback(
+        [this](const std::vector<rclcpp::Parameter> &params) {
+            rcl_interfaces::msg::SetParametersResult result;
+            result.successful = true;
+            for (const auto &p : params) {
+                if (p.get_name() == "auto_pose_topic") {
+                    auto_pose_topic_ = p.as_string();
+                } else if (p.get_name() == "auto_pose_type") {
+                    const auto type = p.as_string();
+                    if (type == "geometry_msgs/msg/PoseWithCovarianceStamped" || type == "PoseWithCovarianceStamped" ||
+                        type == "geometry_msgs/msg/PoseStamped" || type == "PoseStamped") {
+                        auto_pose_type_ = type;
+                    } else {
+                        result.successful = false;
+                        result.reason = "Unsupported auto_pose_type";
+                    }
+                }
+            }
+            if (result.successful) {
+                refreshAutoPoseSubscription();
+            }
+            return result;
+        }
+    );
+
     server_ = std::make_shared<interactive_markers::InteractiveMarkerServer>(
         "interactive_marker_server",
         nh_,
@@ -58,14 +93,44 @@ void WaypointEditorTool::onInitialize()
         "redo_waypoints",
         std::bind(&WaypointEditorTool::handleRedoWaypoints, this, _1, _2)
     );
+    clear_service_ = nh_->create_service<std_srvs::srv::Trigger>(
+        "clear_waypoints",
+        std::bind(&WaypointEditorTool::handleClearWaypoints, this, _1, _2)
+    );
     load_service_ = nh_->create_service<std_srvs::srv::Trigger>(
         "load_waypoints",
         std::bind(&WaypointEditorTool::handleLoadWaypoints, this, _1, _2)
+    );
+    auto_start_service_ = nh_->create_service<std_srvs::srv::Trigger>(
+        "start_auto_waypoints",
+        [this](const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res) {
+            auto_enabled_ = true;
+            res->success = true;
+            res->message = "Auto waypoint capture started\n(topic: " + auto_pose_topic_ + ")";
+            RCLCPP_INFO(nh_->get_logger(), "Auto waypoint capture started");
+        }
+    );
+    auto_stop_service_ = nh_->create_service<std_srvs::srv::Trigger>(
+        "stop_auto_waypoints",
+        [this](const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res) {
+            auto_enabled_ = false;
+            res->success = true;
+            res->message = "Auto waypoint capture stopped";
+            RCLCPP_INFO(nh_->get_logger(), "Auto waypoint capture stopped");
+        }
     );
 
     line_pub_ = nh_->create_publisher<visualization_msgs::msg::Marker>("waypoint_line", 10);
     total_wp_dist_pub_ = nh_->create_publisher<std_msgs::msg::Float64>("total_wp_dist", 10);
     last_wp_dist_pub_  = nh_->create_publisher<std_msgs::msg::Float64>("last_wp_dist", 10);
+    auto_distance_sub_ = nh_->create_subscription<std_msgs::msg::Float64>(
+        "auto_waypoint_min_distance", rclcpp::QoS(1).transient_local(),
+        [this](std_msgs::msg::Float64::SharedPtr msg) {
+            auto_min_distance_m_ = std::max(0.0, msg->data);
+            RCLCPP_INFO(nh_->get_logger(), "Auto waypoint min distance set to %.3f m", auto_min_distance_m_);
+        }
+    );
+    refreshAutoPoseSubscription();
 
     waypoint_sequence_.clear();
     pose_dirty_ = false;
@@ -91,15 +156,8 @@ void WaypointEditorTool::onPoseSet(double x, double y, double theta)
 
     wp.function_command.clear();
 
-    const int new_id = waypoint_sequence_.appendWaypoint(std::move(wp));
-    auto int_marker = createWaypointMarker(new_id);
-    server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
-    server_->applyChanges();
+    const int new_id = appendWaypointAndRefresh(std::move(wp));
     RCLCPP_INFO(nh_->get_logger(), "Added waypoint %d", new_id);
-    waypoint_sequence_.snapshotHistory();
-    pose_dirty_ = false;
-    updateLastDistanceFromWaypoint(new_id);
-    publishRangeMetrics();
 
     deactivate();
 }
@@ -113,6 +171,115 @@ void WaypointEditorTool::updateWaypointMarker()
     }
 
     server_->applyChanges();
+}
+
+int WaypointEditorTool::appendWaypointAndRefresh(Waypoint wp)
+{
+    if (wp.pose.header.frame_id.empty()) {
+        wp.pose.header.frame_id = "map";
+    }
+    if (wp.pose.header.stamp.sec == 0 && wp.pose.header.stamp.nanosec == 0) {
+        wp.pose.header.stamp = nh_->now();
+    }
+
+    const int new_id = waypoint_sequence_.appendWaypoint(std::move(wp));
+    auto int_marker = createWaypointMarker(new_id);
+    server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
+    server_->applyChanges();
+    waypoint_sequence_.snapshotHistory();
+    pose_dirty_ = false;
+    updateLastDistanceFromWaypoint(new_id);
+    publishRangeMetrics();
+    return new_id;
+}
+
+void WaypointEditorTool::handleAutoPose(const geometry_msgs::msg::PoseStamped &pose_in)
+{
+    if (!auto_enabled_) {
+        return;
+    }
+
+    geometry_msgs::msg::PoseStamped pose_map;
+    if (!transformToMapFrame(pose_in, pose_map)) {
+        return;
+    }
+
+    const auto &waypoints = waypoint_sequence_.waypoints();
+    if (!waypoints.empty()) {
+        const auto &last_pose = waypoints.back().pose.pose.position;
+        const double dist = std::hypot(
+            pose_map.pose.position.x - last_pose.x,
+            pose_map.pose.position.y - last_pose.y
+        );
+        if (dist < auto_min_distance_m_) {
+            return;
+        }
+    }
+
+    Waypoint wp;
+    wp.pose = pose_map;
+    wp.function_command.clear();
+    appendWaypointAndRefresh(std::move(wp));
+    RCLCPP_INFO(nh_->get_logger(), "Auto-added waypoint at (%.2f, %.2f)", pose_map.pose.position.x, pose_map.pose.position.y);
+}
+
+bool WaypointEditorTool::transformToMapFrame(const geometry_msgs::msg::PoseStamped &input, geometry_msgs::msg::PoseStamped &output) const
+{
+    if (!tf_buffer_) {
+        return false;
+    }
+
+    output = input;
+    if (output.header.frame_id.empty()) {
+        output.header.frame_id = "map";
+    }
+    if (output.header.frame_id == "map") {
+        return true;
+    }
+
+    try {
+        const auto tf = tf_buffer_->lookupTransform("map", output.header.frame_id, tf2::TimePointZero);
+        tf2::doTransform(input, output, tf);
+        return true;
+    } catch (const tf2::TransformException &ex) {
+        RCLCPP_WARN_THROTTLE(
+            nh_->get_logger(),
+            *nh_->get_clock(),
+            5000,
+            "Failed to transform from %s to map: %s",
+            output.header.frame_id.c_str(),
+            ex.what());
+        return false;
+    }
+}
+
+void WaypointEditorTool::refreshAutoPoseSubscription()
+{
+    auto_pose_sub_.reset();
+    const std::string type = auto_pose_type_;
+
+    if (type == "geometry_msgs/msg/PoseWithCovarianceStamped" || type == "PoseWithCovarianceStamped") {
+        auto_pose_sub_ = nh_->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+            auto_pose_topic_, rclcpp::SensorDataQoS(),
+            [this](const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg) {
+                geometry_msgs::msg::PoseStamped pose_in;
+                pose_in.header = msg->header;
+                pose_in.pose = msg->pose.pose;
+                handleAutoPose(pose_in);
+            }
+        );
+        RCLCPP_INFO(nh_->get_logger(), "Auto pose subscription: %s (PoseWithCovarianceStamped)", auto_pose_topic_.c_str());
+    } else if (type == "geometry_msgs/msg/PoseStamped" || type == "PoseStamped") {
+        auto_pose_sub_ = nh_->create_subscription<geometry_msgs::msg::PoseStamped>(
+            auto_pose_topic_, rclcpp::SensorDataQoS(),
+            [this](const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+                handleAutoPose(*msg);
+            }
+        );
+        RCLCPP_INFO(nh_->get_logger(), "Auto pose subscription: %s (PoseStamped)", auto_pose_topic_.c_str());
+    } else {
+        RCLCPP_WARN(nh_->get_logger(), "Unsupported auto_pose_type: %s", type.c_str());
+    }
 }
 
 visualization_msgs::msg::InteractiveMarker WaypointEditorTool::createWaypointMarker(const int id)
@@ -610,6 +777,18 @@ void WaypointEditorTool::handleRedoWaypoints(const std::shared_ptr<std_srvs::srv
     publishRangeMetrics();
     res->success = true;
     res->message = "Redid waypoint change";
+}
+
+void WaypointEditorTool::handleClearWaypoints(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*req*/, std::shared_ptr<std_srvs::srv::Trigger::Response> res)
+{
+    waypoint_sequence_.clear();
+    pose_dirty_ = false;
+    server_->clear();
+    server_->applyChanges();
+    updateLastDistanceFromWaypoint(0);
+    publishRangeMetrics();
+    res->success = true;
+    res->message = "Cleared all waypoints";
 }
 
 void WaypointEditorTool::activate() {}

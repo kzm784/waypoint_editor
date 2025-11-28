@@ -17,8 +17,8 @@
 
 
 ## 概要
-このパッケージは、ナビゲーションで使用するウェイポイント（Waypoint）を、2次元地図を見ながら直感的に編集・保存できるツールです。  
-編集したウェイポイントは **CSV形式** や Nav2 互換の **YAML形式** で保存できます。
+このパッケージは、ナビゲーションで使用するウェイポイント（Waypoint）を、2D/3D 地図を見ながら直感的に編集・保存できるツールです。  
+編集したウェイポイントは **CSV形式** や Nav2 互換の **YAML形式** で保存でき、自己位置トピックから自動追加も可能です。
 
 
 ## 開発環境
@@ -50,8 +50,8 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 
 ### 2. マップの読み込み (2D / 3D)  
 - Nav2 の `nav2_map_server` を利用して `.yaml` 形式の2Dマップを読み込みます。  
--  `.pcd`形式の3Dマップを読み込むことも可能です。  
-- RViz2 画面右下のパネルで "**Load Map**" をクリックし、使用したい `.yaml` もしくは `.pcd`ファイルを選択してください。
+- `.pcd` 形式の3Dマップを読み込むことも可能です。  
+- RViz2 パネルで、`.yaml` は "**Load 2D Map**"、`.pcd` は "**Load 3D Map**" を使ってください。
 
 ![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
 
@@ -66,20 +66,28 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 ![adding_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/Adding_waypoints_demo.gif)
 
 
-### 4. ウェイポイントの保存  
+### 4. 自己位置からの自動追加（任意）
+- パネルの **Auto Capture** セクションで以下を設定します：
+  - `Auto Δd` : 自動追加するウェイポイント間の最小距離
+  - `Topic` : 自己位置トピック（例 `/amcl_pose`）
+  - `Type` : `PoseWithCovarianceStamped` または `PoseStamped`
+- "**Start Auto Capture**" を押すと、移動に合わせて自動でウェイポイントが追加されます。もう一度押すと停止します。
+
+### 5. ウェイポイントの保存  
 - RViz2 画面右下のパネルで "**Save WPs**" を選択し、ダイアログから **CSV** または **YAML** を選べます。  
 - Nav2 で利用したい場合は **YAML** を選択してください。
 
 ![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
 
 
-### 5. ウェイポイントの読み込み  
+### 6. ウェイポイントの読み込み  
 - "**Load WPs**" ボタンから、保存しておいた `.csv` または `.yaml` ファイルを読み込み、ウェイポイントの再編集が可能です。
 
 ![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)
 
-### 6. 操作の取り消し / やり直し  
-- パネルの "**Undo**" / "**Redo**" ボタンで、移動・回転・削除・ID変更・コマンド編集といった操作を戻したり進めたりできます。
+### 7. 操作の取り消し / やり直し / 全消去  
+- パネルの "**Undo**" / "**Redo**" ボタンで、移動・回転・削除・ID変更・コマンド編集といった操作を戻したり進めたりできます。  
+- "**Clear All**" で全ウェイポイントをまとめて削除できます。
 
 
 ## ライセンス

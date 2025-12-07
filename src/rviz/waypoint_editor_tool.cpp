@@ -186,10 +186,7 @@ int WaypointEditorTool::appendWaypointAndRefresh(Waypoint wp)
     auto int_marker = createWaypointMarker(new_id);
     server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
     server_->applyChanges();
-    waypoint_sequence_.snapshotHistory();
-    pose_dirty_ = false;
-    updateLastDistanceFromWaypoint(new_id);
-    publishRangeMetrics();
+    commitWaypointChanges(new_id);
     return new_id;
 }
 
@@ -403,7 +400,10 @@ visualization_msgs::msg::InteractiveMarker WaypointEditorTool::createWaypointMar
 
 void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualization_msgs::msg::InteractiveMarkerFeedback> &fb)
 {
-    int id = std::stoi(fb->marker_name);
+    const int id = std::stoi(fb->marker_name);
+    if (!isValidWaypointId(id)) {
+        return;
+    }
 
     switch (fb->event_type)
     {
@@ -427,8 +427,7 @@ void WaypointEditorTool::processFeedback(const std::shared_ptr<const visualizati
         case visualization_msgs::msg::InteractiveMarkerFeedback::MOUSE_UP:
         {
             if (pose_dirty_) {
-                waypoint_sequence_.snapshotHistory();
-                pose_dirty_ = false;
+                commitWaypointChanges(id);
             }
             break;
         }
@@ -448,8 +447,8 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
 {
     if (fb->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::MENU_SELECT) { return; }
 
-    int id = std::stoi(fb->marker_name);
-    if (id < 0 || id >= static_cast<int>(waypoint_sequence_.size())) { return; }
+    const int id = std::stoi(fb->marker_name);
+    if (!isValidWaypointId(id)) { return; }
 
     switch (fb->menu_entry_id) {
       
@@ -457,10 +456,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
         case 1:
             waypoint_sequence_.eraseWaypoint(static_cast<std::size_t>(id));
             updateWaypointMarker();
-            waypoint_sequence_.snapshotHistory();
-            pose_dirty_ = false;
-            updateLastDistanceFromWaypoint(id);
-            publishRangeMetrics();
+            commitWaypointChanges(id);
             RCLCPP_INFO(nh_->get_logger(), "Deleted waypoint %d", id);
             break;
 
@@ -485,10 +481,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
                     waypoint_sequence_.eraseWaypoint(static_cast<std::size_t>(id));
                     waypoint_sequence_.insertWaypoint(static_cast<std::size_t>(insert_id), std::move(waypoint));
                     updateWaypointMarker();
-                    waypoint_sequence_.snapshotHistory();
-                    pose_dirty_ = false;
-                    updateLastDistanceFromWaypoint(insert_id);
-                    publishRangeMetrics();
+                    commitWaypointChanges(insert_id);
                     RCLCPP_INFO(nh_->get_logger(), "Changed waypoint id %d to %d", id, insert_id);
                 } else {
                     const int max_index = std::max(0, static_cast<int>(waypoint_sequence_.size()) - 1);
@@ -523,10 +516,7 @@ void WaypointEditorTool::processMenuControl(const std::shared_ptr<const visualiz
             if (ok) {
                 waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command = text.toStdString();
                 updateWaypointMarker();
-                waypoint_sequence_.snapshotHistory();
-                pose_dirty_ = false;
-                updateLastDistanceFromWaypoint(id);
-                publishRangeMetrics();
+                commitWaypointChanges(id);
                 RCLCPP_INFO(nh_->get_logger(), "Updated command of waypoint %d to '%s'", id, waypoint_sequence_.at(static_cast<std::size_t>(id)).function_command.c_str());
             }
         }
@@ -613,6 +603,21 @@ void WaypointEditorTool::publishRangeMetrics()
     publishLineMarker();
     publishTotalWpsDist();
     publishLastWpsDist();
+}
+
+void WaypointEditorTool::commitWaypointChanges(int waypoint_index, bool snapshot_history)
+{
+    if (snapshot_history) {
+        waypoint_sequence_.snapshotHistory();
+    }
+    pose_dirty_ = false;
+    updateLastDistanceFromWaypoint(waypoint_index);
+    publishRangeMetrics();
+}
+
+bool WaypointEditorTool::isValidWaypointId(int id) const
+{
+    return id >= 0 && id < static_cast<int>(waypoint_sequence_.size());
 }
 
 bool WaypointEditorTool::requestFilePathForSaving(std::string &path, bool &save_as_yaml)
@@ -739,11 +744,8 @@ void WaypointEditorTool::handleLoadWaypoints(const std::shared_ptr<std_srvs::srv
         wp.pose.header.stamp = nh_->now();
     }
     waypoint_sequence_.assign(std::move(loaded));
-    waypoint_sequence_.snapshotHistory();
-    pose_dirty_ = false;
     updateWaypointMarker();
-    updateLastDistanceFromWaypoint(static_cast<int>(waypoint_sequence_.size()) - 1);
-    publishRangeMetrics();
+    commitWaypointChanges(static_cast<int>(waypoint_sequence_.size()) - 1);
 
     res->success = true;
     res->message = "Loaded " + std::to_string(waypoint_sequence_.size()) + " waypoints from " + path;
@@ -758,8 +760,7 @@ void WaypointEditorTool::handleUndoWaypoints(const std::shared_ptr<std_srvs::srv
     }
     pose_dirty_ = false;
     updateWaypointMarker();
-    updateLastDistanceFromWaypoint(static_cast<int>(waypoint_sequence_.size()) - 1);
-    publishRangeMetrics();
+    commitWaypointChanges(static_cast<int>(waypoint_sequence_.size()) - 1, false);
     res->success = true;
     res->message = "Undid waypoint change";
 }
@@ -773,8 +774,7 @@ void WaypointEditorTool::handleRedoWaypoints(const std::shared_ptr<std_srvs::srv
     }
     pose_dirty_ = false;
     updateWaypointMarker();
-    updateLastDistanceFromWaypoint(static_cast<int>(waypoint_sequence_.size()) - 1);
-    publishRangeMetrics();
+    commitWaypointChanges(static_cast<int>(waypoint_sequence_.size()) - 1, false);
     res->success = true;
     res->message = "Redid waypoint change";
 }
@@ -785,8 +785,7 @@ void WaypointEditorTool::handleClearWaypoints(const std::shared_ptr<std_srvs::sr
     pose_dirty_ = false;
     server_->clear();
     server_->applyChanges();
-    updateLastDistanceFromWaypoint(0);
-    publishRangeMetrics();
+    commitWaypointChanges(0, false);
     res->success = true;
     res->message = "Cleared all waypoints";
 }

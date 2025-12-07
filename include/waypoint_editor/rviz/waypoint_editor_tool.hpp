@@ -83,6 +83,8 @@ private:
 
     void updateLastDistanceFromWaypoint(int waypoint_index);
     double computeSegmentDistance(std::size_t first, std::size_t second) const;
+    void commitWaypointChanges(int waypoint_index, bool snapshot_history = true);
+    bool isValidWaypointId(int id) const;
 };
 
 } // namespace waypoint_editor

@@ -13,6 +13,9 @@ find_package(pluginlib REQUIRED)
 find_package(interactive_markers REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
@@ -60,6 +63,9 @@ ament_target_dependencies(${PROJECT_NAME}
   interactive_markers
   visualization_msgs
   geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
   std_srvs
   std_msgs
   nav2_msgs
@@ -103,6 +109,9 @@ ament_export_dependencies(
   interactive_markers
   visualization_msgs
   geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
   std_srvs
   std_msgs
   nav2_msgs

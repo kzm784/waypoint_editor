@@ -16,6 +16,9 @@
   <build_depend>interactive_markers</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>nav2_msgs</build_depend>   
@@ -30,6 +33,9 @@
   <exec_depend>interactive_markers</exec_depend>
   <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>nav2_msgs</exec_depend>

@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
       Splitter Ratio: 0.5
-    Tree Height: 747
+    Tree Height: 627
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -116,7 +116,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        waypoint_lines: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -143,39 +143,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_camera_optical_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        front_lrf_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_wheel_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_wheel_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -189,43 +156,13 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
-          Value: true
-        base_link:
-          Value: true
-        front_camera_link:
-          Value: true
-        front_camera_optical_link:
-          Value: true
-        front_lrf_link:
-          Value: true
-        left_wheel_link:
-          Value: true
-        map:
-          Value: true
-        odom:
-          Value: true
-        right_wheel_link:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                front_camera_link:
-                  front_camera_optical_link:
-                    {}
-                front_lrf_link:
-                  {}
-                left_wheel_link:
-                  {}
-                right_wheel_link:
-                  {}
+        {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -274,7 +211,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -1.56999933719635
+      Angle: -0.8100000619888306
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -284,19 +221,19 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 86.25347137451172
-      Target Frame: <Fixed Frame>
+      Scale: 48.10727310180664
+      Target Frame: base_link
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 0.20158174633979797
-      Y: 1.4944989681243896
+      X: 10.337477684020996
+      Y: 1.6515238285064697
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: false
-  Height: 1066
-  Hide Left Dock: false
+    collapsed: true
+  Height: 946
+  Hide Left Dock: true
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000003000000000000015600000391fc0200000002fb000000100044006900730070006c006100790073010000003d00000391000000c900fffffffb0000001200530065006c0065006300740069006f006e00000002b10000011d0000005c00ffffff00000001000001c500000391fc0200000003fb0000000a00560069006500770073010000003d00000102000000a400fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000145000000c00000005c00fffffffb000000260057006100790070006f0069006e00740045006400690074006f007200500061006e0065006c010000020b000001c3000001bb00ffffff000000030000078000000039fc0100000001fb0000000800540069006d0065010000000000000780000002fb00ffffff000004590000039100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000003000000000000015600000319fc0200000002fb000000100044006900730070006c006100790073000000003d00000319000000c900fffffffb0000001200530065006c0065006300740069006f006e00000002b10000011d0000005c00ffffff00000001000001c500000319fc0200000003fb0000000a00560069006500770073010000003d000000b8000000a400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007301000000fb0000008a0000005c00fffffffb000000260057006100790070006f0069006e00740045006400690074006f007200500061006e0065006c010000018b000001cb000001cb00ffffff000000030000078000000039fc0100000001fb0000000800540069006d0065010000000000000780000002fb00ffffff000005b50000031900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -309,4 +246,4 @@ Window Geometry:
     collapsed: false
   Width: 1920
   X: 0
-  Y: 27
+  Y: 147

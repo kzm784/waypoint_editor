@@ -43,29 +43,48 @@ Run the following commands to launch the tool:
 
 ```bash
 cd ~/ros2_ws
-source install/setup.bash
+source install/setup.bashload_waypoints_demo
 ros2 launch waypoint_editor waypoint_editor.launch.py
 ```
 
-### 2. Loading a Map (2D / 3D)  
+### 2. Map
+#### Loading a Map (2D / 3D)  
 - Use Nav2's `nav2_map_server` to load a 2D map in `.yaml` format.  
 - You can also load a 3D map in `.pcd` format.  
 - In the RViz panel, use "**Load 2D Map**" for `.yaml` or "**Load 3D Map**" for `.pcd`.
 
-![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_2d_map_demo.gif)
+![load_map_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/load_map_demo.gif)
 
 
-### 3. Adding Waypoints  
+### 3. Waypoints
+#### Adding Waypoints  
 - From the toolbar at the top of RViz2, select "**Add Waypoint**".  
 - Click and drag on the map to add a new waypoint with the desired position and orientation.  
 - Once added, each waypoint can:
   - Be **moved or rotated** via drag operations
   - Be **right-clicked** to open a context menu for deletion or other actions
 
-![adding_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/Adding_waypoints_demo.gif)
+![interact_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/interact_waypoints_demo.gif)
+
+#### Saving Waypoints  
+- Click "**Save WPs**" in the bottom-right panel of RViz2 and pick either **CSV** or **YAML** in the dialog.  
+- Select **YAML** when you need a Nav2-compatible file for waypoint follower demos.
+
+![save_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/save_waypoints_demo.gif)
+
+#### Loading Waypoints  
+- Click "**Load WPs**" button in the bottom-right panel of RViz2 and select the previously saved `.csv` or `.yaml` file.  
+- The waypoints can then be edited again in the same interface.
+
+![load_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/load_waypoints_demo.gif)
+
+#### Undo / Redo / Clear  
+- Use the panel's "**Undo**" and "**Redo**" buttons to step backward or forward through waypoint edits (moving, rotating, deleting, ID changes, or command edits).
+- Use "**Clear All**" to remove all waypoints at once.
 
 
-### 4. Auto-capturing Waypoints from Localization (optional)
+### 4. Auto Capture
+#### Auto-capturing Waypoints from Localization
 - In the panel's **Auto Capture** section, set:
   - `Auto Δd`: minimum distance between auto-added waypoints
   - `Topic`: localization topic (e.g., `/amcl_pose`)
@@ -73,22 +92,7 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 - Click "**Start Auto Capture**" to begin; waypoints will drop automatically as you move.
 - Click again to stop.
 
-### 5. Saving Waypoints  
-- Click "**Save WPs**" in the bottom-right panel of RViz2 and pick either **CSV** or **YAML** in the dialog.  
-- Select **YAML** when you need a Nav2-compatible file for waypoint follower demos.
-
-![saving_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/saving_waypoints.gif)
-
-
-### 6. Loading Waypoints  
-- Click "**Load WPs**" button in the bottom-right panel of RViz2 and select the previously saved `.csv` or `.yaml` file.  
-- The waypoints can then be edited again in the same interface.
-
-![loading_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/loading_waypoints.gif)
-
-### 7. Undo / Redo / Clear  
-- Use the panel's "**Undo**" and "**Redo**" buttons to step backward or forward through waypoint edits (moving, rotating, deleting, ID changes, or command edits).
-- Use "**Clear All**" to remove all waypoints at once.
+![auto_capture_waypoints_demo](https://raw.github.com/wiki/kzm784/waypoint_editor/images/auto_capture_waypoints_demo.gif)
 
 
 ## License

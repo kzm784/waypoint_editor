@@ -92,7 +92,7 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
 - Click "**Start Auto Capture**" to begin; waypoints will drop automatically as you move.
 - Click again to stop.
 
-![auto_capture_waypoints_demo](https://raw.githubusercontent.com/wiki/kzm784/waypoint_editor/images/auto_capture_waypoints_demo_small.gif)
+![auto_capture_waypoints_demo](https://raw.githubusercontent.com/wiki/kzm784/waypoint_editor/images/auto_capture_waypoints_demo.gif)
 
 
 ## License

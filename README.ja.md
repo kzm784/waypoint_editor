@@ -91,7 +91,7 @@ ros2 launch waypoint_editor waypoint_editor.launch.py
   - `Type` : `PoseWithCovarianceStamped` または `PoseStamped`
 - "**Start Auto Capture**" を押すと、移動に合わせて自動でウェイポイントが追加されます。もう一度押すと停止します。
 
-![auto_capture_waypoints_demo](https://raw.githubusercontent.com/wiki/kzm784/waypoint_editor/images/auto_capture_waypoints_demo_small.gif)
+![auto_capture_waypoints_demo](https://raw.githubusercontent.com/wiki/kzm784/waypoint_editor/images/auto_capture_waypoints_demo.gif)
 
 ## ライセンス
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)

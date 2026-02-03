@@ -23,12 +23,23 @@ find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+if("$ENV{ROS_DISTRO}" STREQUAL "jazzy" OR "$ENV{ROS_DISTRO}" STREQUAL "rolling")
+  set(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
+  find_package(Qt6 REQUIRED COMPONENTS Widgets)
+  set(QT_PACKAGE Qt6)
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Widgets)
+  set(QT_PACKAGE Qt5)
+endif()
 
 set(panel_headers
   include/waypoint_editor/rviz/waypoint_editor_panel.hpp
 )
-qt5_wrap_cpp(waypoint_editor_moc ${panel_headers})
+if(QT_PACKAGE STREQUAL "Qt6")
+  qt6_wrap_cpp(waypoint_editor_moc ${panel_headers})
+else()
+  qt5_wrap_cpp(waypoint_editor_moc ${panel_headers})
+endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -51,7 +62,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  Qt5::Widgets
+  ${QT_PACKAGE}::Widgets
   yaml-cpp
 )
 

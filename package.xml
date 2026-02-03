@@ -25,6 +25,8 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>pcl_conversions</build_depend>
   <build_depend>yaml-cpp</build_depend>
+  <build_depend condition="$ROS_DISTRO == jazzy or $ROS_DISTRO == rolling">qt6-base-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO != jazzy and $ROS_DISTRO != rolling">qtbase5-dev</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>pluginlib</exec_depend>
@@ -42,6 +44,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>pcl_conversions</exec_depend>
   <exec_depend>yaml-cpp</exec_depend>
+  <exec_depend condition="$ROS_DISTRO == jazzy or $ROS_DISTRO == rolling">qt6-base-dev</exec_depend>
+  <exec_depend condition="$ROS_DISTRO != jazzy and $ROS_DISTRO != rolling">qtbase5-dev</exec_depend>
   <exec_depend>nav2_map_server</exec_depend>
   <exec_depend>nav2_lifecycle_manager</exec_depend>
   <exec_depend>rviz2</exec_depend>

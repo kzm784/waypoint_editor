@@ -84,10 +84,15 @@ bool WaypointCsv::Save(const std::vector<Waypoint> &waypoints, const std::string
 
     for (std::size_t i = 0; i < waypoints.size(); ++i) {
         const auto &pose = waypoints[i].pose.pose;
+        /* 3D Pose */
+        // ofs << i << ","
+        //     << pose.position.x << "," << pose.position.y << "," << pose.position.z << ","
+        //     << pose.orientation.x << "," << pose.orientation.y << ","
+        //     << pose.orientation.z << "," << pose.orientation.w;
+        /* 2D Pose */
         ofs << i << ","
-            << pose.position.x << "," << pose.position.y << "," << pose.position.z << ","
-            << pose.orientation.x << "," << pose.orientation.y << ","
-            << pose.orientation.z << "," << pose.orientation.w;
+            << pose.position.x << "," << pose.position.y << "," << 0.0 << ","
+            << 0.0 << "," << 0.0 << "," << pose.orientation.z << "," << pose.orientation.w;
 
         const auto &tokens = command_columns[i];
         for (std::size_t column = 0; column < max_columns; ++column) {
@@ -120,7 +125,7 @@ bool WaypointCsv::Load(const std::string &path, std::vector<Waypoint> &waypoints
             continue;
         }
         auto columns = SplitCsvRow(line);
-        if (columns.size() < 9U) {
+        if (columns.size() < 8U) {
             continue;
         }
 

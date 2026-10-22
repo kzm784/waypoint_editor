@@ -182,6 +182,11 @@ int WaypointEditorTool::appendWaypointAndRefresh(Waypoint wp)
         wp.pose.header.stamp = nh_->now();
     }
 
+    /* Convert for 2D Pose */
+    wp.pose.pose.position.z = 0.0;
+    wp.pose.pose.orientation.x = 0.0;
+    wp.pose.pose.orientation.y = 0.0;
+
     const int new_id = waypoint_sequence_.appendWaypoint(std::move(wp));
     auto int_marker = createWaypointMarker(new_id);
     server_->insert(int_marker, std::bind(&WaypointEditorTool::processFeedback, this, _1));
